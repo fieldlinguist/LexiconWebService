@@ -10,7 +10,7 @@
     "test:coverage": "nyc npm test",
     "test:unit": "mocha --recursive test/middleware test/models test/routes",
     "test:integration": "mocha --recursive test/integration",
-    "postinstall": "cd bin; wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
+    "postinstall": "mkdir bin; cd bin; wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
   },
   "dependencies": {
     "debug": "^2.2.0",
