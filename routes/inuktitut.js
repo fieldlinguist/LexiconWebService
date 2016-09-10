@@ -1,108 +1,40 @@
-var http = require('http'),
-  https = require('https'),
-  express = require('express'),
-  app = express(),
-  fs = require('fs'),
-  exec = require('child_process').exec,
-  node_config = require("./lib/nodeconfig_local"),
-  couch_keys = require("./lib/couchkeys_local");
+"use strict";
 
-//read in the specified filenames as the security key and certificate
-node_config.httpsOptions.key = fs.readFileSync(node_config.httpsOptions.key);
-node_config.httpsOptions.cert = fs.readFileSync(node_config.httpsOptions.cert);
+var debug = require("debug")("routes:inuktitut");
+var express = require("express");
+var exec = require("child_process").exec;
 
-// configure Express
-app.configure(function() {
-  app.use(express.favicon());
-  app.use(express.logger());
-  app.use(express.static(__dirname + '/../FieldDBGlosser/samples/vanilla'));
-  app.use(express.cookieParser());
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
+var router = express.Router();
 
-  var allowCrossDomain = function(req, res, next) {
-    var check = false;
-    if (req.headers.origin) {
-      res.header('Access-Control-Allow-Origin', req.headers.origin);
-      check = true;
-    }
-    if (req.headers['access-control-request-method']) {
-      res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
-      check = true;
-    }
-    if (req.headers['access-control-request-headers']) {
-      res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
-      check = true;
-    }
-    if (check) {
-      res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
-    }
-
-    // intercept OPTIONS method
-    if (check && req.method == 'OPTIONS') {
-      res.send(200);
-    } else {
-      next();
-    }
-  };
-
-  app.use(allowCrossDomain);
-  app.use(app.router);
-});
-
-/*
- * Routes
- */
-
-app.all('/farley/inuktitut/:word', function(req, res) {
+function useUqailaut(req, res) {
 
   var searchTerm = encodeURIComponent(req.params.word);
 
-  var command = './lib/uqailaut.sh ' + searchTerm;
+  var command = "./lib/uqailaut.sh " + searchTerm;
   var child = exec(command, function(err, stdout, stderr) {
     if (err) {
       throw err;
     } else {
-      console.log('Analyzed: ' + searchTerm);
-      console.log('sent results: ' + stdout);
+      debug("Analyzed: " + searchTerm);
+      debug("sent results: " + stdout);
 
-      var results = stdout.split('\n');
+      var results = stdout.split("\n");
       results.pop();
 
       res.send({
-        'output': results
+        "output": results
       });
     }
   });
 
-});
-
-app.all('/analysisbytierbyword/inuktitut/:word', function(req, res) {
-  analyzeInuktitutByTierByWord(req, res, 'all');
-});
-
-app.all('/allomorphs/inuktitut/:word', function(req, res) {
-  analyzeInuktitutByTierByWord(req, res, 'allomorphs');
-});
-
-app.all('/morphemes/inuktitut/:word', function(req, res) {
-  analyzeInuktitutByTierByWord(req, res, 'morphemes');
-});
-
-app.all('/morphosyntacticcategories/inuktitut/:word', function(req, res) {
-  analyzeInuktitutByTierByWord(req, res, 'morphosyntacticcategories');
-});
-
-app.all('/gloss/inuktitut/:word', function(req, res) {
-  analyzeInuktitutByTierByWord(req, res, 'gloss');
-});
+}
 
 function analyzeInuktitutByTierByWord(req, res, returnTier) {
-  var searchTerm = encodeURIComponent(req.params.word).split('%20');
-  var allomorphs = {},
-    morphemes = {},
-    glosses = {};
-  farley = {};
+  var searchTerm = encodeURIComponent(req.params.word).split("%20");
+  var allomorphs = {};
+  var morphemes = {};
+  var glosses = {};
+  var farley = {};
   var submittedTerms = searchTerm.length;
   var processedTerms = 0;
 
@@ -116,14 +48,14 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
 
     (function(index) {
       var currentWord = searchTerm[index];
-      var command = './lib/uqailaut.sh ' + currentWord;
+      var command = "./lib/uqailaut.sh " + currentWord;
       var child = exec(command, function(err, stdout, stderr) {
         if (err) {
           throw err;
         } else {
-          console.log('Analyzed: ' + currentWord);
+          debug("Analyzed: " + currentWord);
 
-          var results = stdout.split('\n');
+          var results = stdout.split("\n");
           results.pop();
           farley[currentWord] = results;
 
@@ -134,7 +66,7 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
             glosses[currentWord].push(currentWord);
 
             processedTerms++;
-            if (processedTerms == submittedTerms) {
+            if (processedTerms === submittedTerms) {
               var output = filterOutput({
                 analysisByTierByWord: {
                   allomorphs: allomorphs,
@@ -143,7 +75,7 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
                 },
                 farley: farley
               }, returnTier);
-              console.log('Sent results: \n' + JSON.stringify(output));
+              debug("Sent results: \n" + JSON.stringify(output));
               res.send(output);
             }
 
@@ -154,17 +86,23 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
               gReg = new RegExp(/([^{:\/}]+)(?=\})/g);
 
             for (var line in results) {
-              var aMatch = results[line].match(aReg).join('-'),
-                mMatch = results[line].match(mReg).join('-'),
-                gMatch = results[line].replace(/-/g, '.').match(gReg).join('-');
+              var aMatch = results[line].match(aReg).join("-"),
+                mMatch = results[line].match(mReg).join("-"),
+                gMatch = results[line].replace(/-/g, ".").match(gReg).join("-");
 
-              if (allomorphs[currentWord].indexOf(aMatch) === -1) allomorphs[currentWord].push(aMatch);
-              if (morphemes[currentWord].indexOf(mMatch) === -1) morphemes[currentWord].push(mMatch);
-              if (glosses[currentWord].indexOf(gMatch) === -1) glosses[currentWord].push(gMatch);
+              if (allomorphs[currentWord].indexOf(aMatch) === -1) {
+                allomorphs[currentWord].push(aMatch);
+              }
+              if (morphemes[currentWord].indexOf(mMatch) === -1) {
+                morphemes[currentWord].push(mMatch);
+              }
+              if (glosses[currentWord].indexOf(gMatch) === -1) {
+                glosses[currentWord].push(gMatch);
+              }
 
             }
             processedTerms++;
-            if (processedTerms == submittedTerms) {
+            if (processedTerms === submittedTerms) {
               var output = filterOutput({
                 analysisByTierByWord: {
                   allomorphs: allomorphs,
@@ -173,7 +111,7 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
                 },
                 farley: farley
               }, returnTier);
-              console.log('Sent results: \n' + JSON.stringify(output));
+              debug("Sent results: \n" + JSON.stringify(output));
               res.send(output);
             }
           }
@@ -184,29 +122,48 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
 }
 
 function filterOutput(output, returnTier) {
-
   switch (returnTier) {
-    case 'all':
+    case "all":
       return output;
       break;
-    case 'allomorphs':
+    case "allomorphs":
       return output.analysisByTierByWord.allomorphs;
       break;
-    case 'morphemes':
+    case "morphemes":
       return output.analysisByTierByWord.morphemes;
       break;
-    case 'gloss':
+    case "gloss":
       return output.analysisByTierByWord.glosses;
       break;
-    case 'morphosyntacticcategories':
+    case "morphosyntacticcategories":
       return output.analysisByTierByWord.glosses;
       break;
   }
-
 }
 
-//https.createServer(node_config.httpsOptions, app).listen(node_config.httpsOptions.port);
-app.listen(node_config.httpsOptions.port);
-console.log(new Date() + 'Node+Express server listening on port %d', node_config.httpsOptions.port);
+router.all("/farley/inuktitut/:word", useUqailaut);
 
-module.exports = app;
+router.all("/analysisbytierbyword/inuktitut/:word", function(req, res) {
+  analyzeInuktitutByTierByWord(req, res, "all");
+});
+
+router.all("/allomorphs/inuktitut/:word", function(req, res) {
+  analyzeInuktitutByTierByWord(req, res, "allomorphs");
+});
+
+router.all("/morphemes/inuktitut/:word", function(req, res) {
+  analyzeInuktitutByTierByWord(req, res, "morphemes");
+});
+
+router.all("/morphosyntacticcategories/inuktitut/:word", function(req, res) {
+  analyzeInuktitutByTierByWord(req, res, "morphosyntacticcategories");
+});
+
+router.all("/gloss/inuktitut/:word", function(req, res) {
+  analyzeInuktitutByTierByWord(req, res, "gloss");
+});
+
+module.exports.useUqailaut = useUqailaut;
+module.exports.analyzeInuktitutByTierByWord = analyzeInuktitutByTierByWord;
+
+module.exports.router = router;

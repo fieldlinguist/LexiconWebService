@@ -5,7 +5,7 @@ var supertest = require("supertest");
 var api = require("../../");
 
 describe("/v1", function() {
-  describe("lexicon", function() {
+  describe("train", function() {
     it("should train a lexicon", function(done) {
       this.timeout(10 * 1000);
 

@@ -6,7 +6,7 @@ var express = require('express');
 var morgan = require('morgan');
 
 var errorsMiddleware = require('./middleware/error');
-// var inuktitutRoutes = require('./routes/inuktitut').router;
+var inuktitutRoutes = require('./routes/inuktitut').router;
 var searchRoutes = require('./routes/search').router;
 var trainRoutes = require('./routes/train').router;
 
@@ -34,7 +34,7 @@ service.use(bodyParser.urlencoded({
  */
 service.use('/search', searchRoutes);
 service.use('/train', trainRoutes);
-// service.use('/', inuktitutRoutes);
+service.use('/', inuktitutRoutes);
 
 /**
  * Not found
