@@ -18,6 +18,8 @@ var api = require("../../");
  */
 describe("/v1", function() {
   describe("GET inuktitut", function() {
+    this.timeout(10 * 1000);
+
     describe("farley's Uqailaut", function() {
       it("should analyze nuna", function(done) {
         supertest(api)

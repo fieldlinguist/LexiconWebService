@@ -7,7 +7,7 @@ var api = require("../../");
 describe("/v1", function() {
   describe("search", function() {
     it("should search a database", function(done) {
-      this.timeout(20 * 1000);
+      this.timeout(10 * 1000);
 
       supertest(api)
         .post("/search/testinglexicon-kartuli")
