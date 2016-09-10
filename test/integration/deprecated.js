@@ -1,13 +1,10 @@
-'use strict';
-/* globals Promise */
+"use strict";
+var expect = require("chai").expect;
 
-var expect = require('chai').expect;
-var supertest = require('supertest');
+var api = require("../../");
 
-var api = require('../../');
-
-describe('/v1', function() {
-  it('should load the service', function(){
-    expect(api).to.be.defined;
+describe("/v1", function() {
+  it("should load the service", function(){
+    expect(api).to.be.an("function");
   });
 });

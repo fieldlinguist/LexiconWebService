@@ -1,13 +1,11 @@
-'use strict';
-/* globals Promise */
+"use strict";
+var expect = require("chai").expect;
+var supertest = require("supertest");
 
-var expect = require('chai').expect;
-var supertest = require('supertest');
+var api = require("../../");
 
-var api = require('../../');
-
-describe('/v1', function() {
-  describe('lexicon', function() {
+describe("/v1", function() {
+  describe("lexicon", function() {
     it("should train a lexicon", function(done) {
       this.timeout(20 * 1000);
 

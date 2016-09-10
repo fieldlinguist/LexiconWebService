@@ -1,6 +1,4 @@
 "use strict";
-/* globals Promise */
-
 var expect = require("chai").expect;
 var supertest = require("supertest");
 

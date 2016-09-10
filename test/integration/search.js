@@ -1,13 +1,11 @@
-'use strict';
-/* globals Promise */
+"use strict";
+var expect = require("chai").expect;
+var supertest = require("supertest");
 
-var expect = require('chai').expect;
-var supertest = require('supertest');
+var api = require("../../");
 
-var api = require('../../');
-
-describe('/v1', function() {
-  describe('search', function() {
+describe("/v1", function() {
+  describe("search", function() {
     it("should search a database", function(done) {
       this.timeout(20 * 1000);
 
@@ -25,10 +23,10 @@ describe('/v1', function() {
           console.log(res.body);
           expect(res.status).to.equal(500);
           expect(res.body).to.deep.equal({
-            code: 'ECONNREFUSED',
-            errno: 'ECONNREFUSED',
-            syscall: 'connect',
-            address: '127.0.0.1',
+            code: "ECONNREFUSED",
+            errno: "ECONNREFUSED",
+            syscall: "connect",
+            address: "127.0.0.1",
             port: 3195
           });
 
