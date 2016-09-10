@@ -98,18 +98,6 @@ app.all('/gloss/inuktitut/:word', function(req, res) {
   analyzeInuktitutByTierByWord(req, res, 'gloss');
 });
 
-app.post('/train/lexicon/:pouchname', function(req, res) {
-
-  var pouchname = req.params.pouchname;
-  var couchoptions = JSON.parse(JSON.stringify(node_config.corpusOptions));
-  couchoptions.path = '/' + pouchname + '/_design/deprecated/_view/get_datum_fields';
-  couchoptions.auth = 'public:none'; // Not indexing non-public data couch_keys.username + ':' + couch_keys.password;
-
-  makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
-    res.send(result);
-  });
-
-});
 
 app.post('/search/:pouchname', function(req, res) {
   console.log(req.body);
