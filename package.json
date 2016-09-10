@@ -2,6 +2,9 @@
   "name": "lexicon-elasticsearch",
   "version": "2.42.13",
   "description": "a simple nodejs elasticsearch wrapper for the lexicon server",
+  "scripts": {
+    "postinstall": "cd bin; wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
+  },
   "dependencies": {
     "express": "~3.3.5",
     "forever": "latest"
