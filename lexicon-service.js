@@ -5,8 +5,8 @@ var http = require('http'),
   fs = require('fs'),
   exec = require('child_process').exec,
   search = require('./lib/search'),
-  node_config = require("./lib/nodeconfig_devserver"),
-  couch_keys = require("./lib/couchkeys_devserver");
+  node_config = require("./lib/nodeconfig_local"),
+  couch_keys = require("./lib/couchkeys_local");
 
 //read in the specified filenames as the security key and certificate
 node_config.httpsOptions.key = fs.readFileSync(node_config.httpsOptions.key);
@@ -102,7 +102,7 @@ app.post('/train/lexicon/:pouchname', function(req, res) {
 
   var pouchname = req.params.pouchname;
   var couchoptions = JSON.parse(JSON.stringify(node_config.corpusOptions));
-  couchoptions.path = '/' + pouchname + '/_design/pages/_view/get_datum_fields';
+  couchoptions.path = '/' + pouchname + '/_design/deprecated/_view/get_datum_fields';
   couchoptions.auth = 'public:none'; // Not indexing non-public data couch_keys.username + ':' + couch_keys.password;
 
   makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
