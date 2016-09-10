@@ -8,7 +8,7 @@ var morgan = require('morgan');
 var errorsMiddleware = require('./middleware/error');
 // var inuktitutRoutes = require('./routes/inuktitut').router;
 var searchRoutes = require('./routes/search').router;
-// var trainRoutes = require('./routes/train').router;
+var trainRoutes = require('./routes/train').router;
 
 var service = express();
 
@@ -33,7 +33,7 @@ service.use(bodyParser.urlencoded({
  * Routes
  */
 service.use('/search', searchRoutes);
-// service.use('/train', trainRoutes);
+service.use('/train', trainRoutes);
 // service.use('/', inuktitutRoutes);
 
 /**

@@ -5,7 +5,7 @@ var sinon = require('sinon');
 
 var error = require('./../../middleware/error');
 
-describe.only('error middleware', function() {
+describe('error middleware', function() {
   var err = new Error('oops');
   err.status = 500;
 
