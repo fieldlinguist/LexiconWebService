@@ -98,40 +98,6 @@ app.all('/gloss/inuktitut/:word', function(req, res) {
   analyzeInuktitutByTierByWord(req, res, 'gloss');
 });
 
-
-app.post('/search/:pouchname', function(req, res) {
-  console.log(req.body);
-  var pouchname = req.params.pouchname;
-  var queryString = req.body.value;
-  if (queryString && typeof queryString.trim === 'function') {
-    queryString = queryString.trim();
-    console.log('Trimming string '+ queryString);
-  }
-  if (!queryString) {
-    res.send('400', []);
-    return;
-  }
-  var queryTokens = search.processQueryString(queryString);
-  if (!queryTokens || queryTokens.length === 0) {
-    res.send('400', []);
-    return;
-  }
-  var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
-
-  var searchoptions = JSON.parse(JSON.stringify(node_config.searchOptions));
-  searchoptions.path = '/' + pouchname + '/datums/_search';
-  searchoptions.headers = {
-    'Content-Type': 'application/json',
-    'Content-Length': Buffer.byteLength(elasticsearchTemplateString, 'utf8')
-  };
-
-  makeJSONRequest(searchoptions, elasticsearchTemplateString, function(statusCode, results) {
-    console.log(elasticsearchTemplateString);
-    res.send(statusCode, results);
-  });
-
-});
-
 function analyzeInuktitutByTierByWord(req, res, returnTier) {
   var searchTerm = encodeURIComponent(req.params.word).split('%20');
   var allomorphs = {},
