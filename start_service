@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cd $FIELDDB_HOME/LexiconWebService
-bash switch_to_producti.sh 
 
 forever \
 start \

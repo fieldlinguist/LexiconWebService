@@ -6,7 +6,7 @@ compiled_handlebars.js
 #ignore private config files
 *_production*
 
-# Ignore natural lib 
+# Ignore natural lib
 public/libs/natural/
 
 .wav
@@ -19,12 +19,13 @@ audio_stimuli
 proguard.cfg
 
 node_modules
-bin
+bin/Uqailaut.jar
 gen
 
 # Node #
 ########
 lib-cov
+.nyc_output
 *.seed
 *.log
 *.csv
