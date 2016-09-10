@@ -8,4 +8,3 @@ start \
 -ao $FIELDDB_HOME/logs/fielddblexiconout.log \
 -ae $FIELDDB_HOME/logs/fielddblexiconerr.log \
 lexicon-service.js
-
