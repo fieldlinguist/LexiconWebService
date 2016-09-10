@@ -278,6 +278,7 @@ function makeJSONRequest(options, data, onResult) {
     console.log('Error searching for ' + JSON.stringify(data));
     console.log(options);
     console.log(err);
+    onResult(500, err);
   });
 
   if (data) {
