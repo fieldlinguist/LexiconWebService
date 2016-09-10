@@ -5,6 +5,7 @@
   "main": "lexicon-service.js",
   "scripts": {
     "start": "node lexicon-service.js",
+    "lint": "jshint test",
     "test": "mocha --recursive test",
     "test:coverage": "nyc npm test",
     "test:unit": "mocha --recursive test/middleware test/models test/routes",
