@@ -2,8 +2,25 @@
   "name": "lexicon-elasticsearch",
   "version": "2.42.13",
   "description": "a simple nodejs elasticsearch wrapper for the lexicon server",
+  "main": "lexicon-service.js",
+  "scripts": {
+    "start": "node lexicon-service.js",
+    "lint": "jshint test",
+    "test": "mocha --recursive test",
+    "test:coverage": "nyc npm test",
+    "test:unit": "mocha --recursive test/middleware test/models test/routes",
+    "test:integration": "mocha --recursive test/integration",
+    "postinstall": "mkdir bin; cd bin; wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
+  },
   "dependencies": {
+    "debug": "^2.2.0",
     "express": "~3.3.5",
     "forever": "latest"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "nyc": "^8.1.0",
+    "supertest": "^2.0.0"
   }
 }
