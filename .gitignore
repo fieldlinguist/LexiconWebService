@@ -19,7 +19,7 @@ audio_stimuli
 proguard.cfg
 
 node_modules
-bin
+bin/Uqailaut.jar
 gen
 
 # Node #
