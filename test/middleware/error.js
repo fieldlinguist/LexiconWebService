@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
+var expect = require("chai").expect;
+var sinon = require("sinon");
 
-var error = require('./../../middleware/error');
+var error = require("./../../middleware/error");
 
-describe('error middleware', function() {
-  var err = new Error('oops');
+describe("error middleware", function() {
+  var err = new Error("oops");
   err.status = 500;
 
   var req = {
@@ -16,23 +16,23 @@ describe('error middleware', function() {
   };
   var res = {};
 
-  it('should load', function() {
-    expect(error).to.be.a('function');
+  it("should load", function() {
+    expect(error).to.be.a("function");
   });
 
-  describe('api endpoint', function() {
+  describe("api endpoint", function() {
     beforeEach(function() {
-      req.url = '/v1/nodata';
+      req.url = "/v1/nodata";
       res.json = sinon.spy();
       res.status = sinon.spy();
     });
 
-    describe('in development', function() {
+    describe("in development", function() {
       beforeEach(function() {
-        process.env.NODE_ENV = 'development';
+        process.env.NODE_ENV = "development";
       });
 
-      it('should expose stack traces', function() {
+      it("should expose stack traces", function() {
         error(err, req, res, function() {});
 
         sinon.assert.calledWith(res.status, 500);
@@ -45,12 +45,12 @@ describe('error middleware', function() {
 
     });
 
-    describe('in production', function() {
+    describe("in production", function() {
       beforeEach(function() {
-        process.env.NODE_ENV = 'production';
+        process.env.NODE_ENV = "production";
       });
 
-      it('should not expose stack traces', function() {
+      it("should not expose stack traces", function() {
         error(err, req, res, function() {});
 
         sinon.assert.calledWith(res.status, 500);
