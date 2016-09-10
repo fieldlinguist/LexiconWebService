@@ -1,8 +1,10 @@
 'use strict';
 
 var bodyParser = require('body-parser');
+var cors = require("cors");
 var debug = require('debug')('service');
 var express = require('express');
+var favicon = require("serve-favicon");
 var morgan = require('morgan');
 
 var errorsMiddleware = require('./middleware/error');
@@ -28,10 +30,13 @@ service.use(bodyParser.urlencoded({
 /**
  * Middleware
  */
+service.use(cors());
 
 /**
  * Routes
  */
+service.use(favicon(__dirname + "/public/favicon.ico"));
+service.use(express.static(__dirname + '/../FieldDBGlosser/samples/vanilla'));
 service.use('/search', searchRoutes);
 service.use('/train', trainRoutes);
 service.use('/', inuktitutRoutes);
