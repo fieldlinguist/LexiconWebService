@@ -32,7 +32,7 @@ service.use(bodyParser.urlencoded({
 /**
  * Routes
  */
-// service.use('/search', searchRoutes);
+service.use('/search', searchRoutes);
 // service.use('/train', trainRoutes);
 // service.use('/', inuktitutRoutes);
 
