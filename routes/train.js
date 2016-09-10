@@ -17,8 +17,8 @@ function trainLexicon(req, res) {
 
   var pouchname = req.params.pouchname;
   var couchoptions = JSON.parse(JSON.stringify(config.corpusOptions));
-  couchoptions.path = '/' + pouchname + '/_design/deprecated/_view/get_datum_fields';
-  couchoptions.auth = 'public:none'; // Not indexing non-public data couch_keys.username + ':' + couch_keys.password;
+  couchoptions.path = "/" + pouchname + "/_design/deprecated/_view/get_datum_fields";
+  couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
   makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
     res.send(result);

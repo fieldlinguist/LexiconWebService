@@ -1,15 +1,15 @@
-'use strict';
+"use strict";
 
-var debug = require('debug')('middleware:error');
+var debug = require("debug")("middleware:error");
 
 /*jshint -W098 */
 function errors(err, req, res, next) {
   /*jshint +W098 */
   var data;
 
-  debug('in the error handler', err, err.stack);
+  debug("in the error handler", err, err.stack);
 
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
     // expose stack traces
     data = {
       message: err.message,
@@ -25,14 +25,14 @@ function errors(err, req, res, next) {
 
   data.status = err.status || err.statusCode || 500;
 
-  if (data.status === 500 && data.message === 'Failed to obtain access token') {
+  if (data.status === 500 && data.message === "Failed to obtain access token") {
     data.status = 403;
   }
 
   res.status(data.status);
-  if (typeof res.json === 'function'){
+  if (typeof res.json === "function"){
     res.json(data);
-  } else if (typeof req.json === 'function'){
+  } else if (typeof req.json === "function"){
     req.json(data);
   }
 }
