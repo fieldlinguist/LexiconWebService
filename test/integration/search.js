@@ -163,20 +163,24 @@ describe("/v1", function() {
           expect(res.body.elasticSearchResult).to.deep.equal({
             took: res.body.elasticSearchResult.took,
             errors: false,
-            items: [{
+            items: res.body.elasticSearchResult.items
+          });
+
+          res.body.elasticSearchResult.items.map(function(item) {
+            expect(item).to.deep.equal({
               index: {
-                "_id": res.body.elasticSearchResult.items[0].index._id,
+                "_id": item.index._id,
                 "_index": "testinglexicon-kartuli",
                 "_shards": {
                   "failed": 0,
                   "successful": 1,
                   "total": 2
                 },
-                "_type": "type1",
-                "_version": res.body.elasticSearchResult.items[0].index._version,
-                "status": res.body.elasticSearchResult.items[0].index.status
+                "_type": "datum",
+                "_version": item.index._version,
+                "status": item.index.status
               }
-            }]
+            });
           });
 
           done();

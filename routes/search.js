@@ -75,45 +75,28 @@ function indexDatabase(req, res, next) {
       return next(couchDBResult);
     }
 
-    // add id to each searchable
+    // create bulk requests
     var data = [];
-
     couchDBResult.rows.map(function(row) {
       var searchable = row.key;
       data.push({
-        "create": {
+        "index": {
           "_id": row.id,
-          // "_type": "type1",
-          "_index": dbname + "/datum"
+          "_type": "datum",
+          "_index": dbname
         }
       });
       data.push(searchable);
     });
 
-    // data.unshift({ "index": { "_type": "blog" }});
-    // convert into 1 searchable per line
+    // convert into 1 request per line
     data = data.map(JSON.stringify).join("\n") + "\n";
-    debug("re-indexing ", data); // TODO what data?
-
-    data = `{ "index" : { "_index" : "${dbname}", "_type" : "type1", "_id" : "${couchDBResult.rows[0].id}" } }
-{ "field1" : "value1" }
-`;
-    debug("overrode the data", data);
-
+    debug("re-indexing ", data);
 
     var searchOptions = JSON.parse(JSON.stringify(config.searchOptions));
     searchOptions.method = "POST";
     searchOptions.data = data;
-    // searchOptions.headers = {
-    //   "Content-Type": "application/json",
-    //   "Content-Length": Buffer.byteLength(data, "utf8")
-    // };
-    // searchOptions.headers = {
-    //   "Content-Type": "application/x-www-form-urlencoded",
-    //   "Content-Length": 93
-    // };
-    searchOptions.path = "/_bulk"; // TODO what url?
-    // searchOptions.path = "/" + dbname + "/datum/_bulk";
+    searchOptions.path = "/" + dbname + "/datum/_bulk";
 
     makeJSONRequest(searchOptions, function(status, elasticSearchResult) {
       debug("index search elasticSearchResult", elasticSearchResult);
