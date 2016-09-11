@@ -1,11 +1,4 @@
 module.exports = {
-  httpsOptions: {
-    key: "fielddb_debug.key",
-    cert: "fielddb_debug.crt",
-    port: "3185",
-    host: "localhost",
-    method: "GET"
-  },
   corpusOptions: {
     protocol: "http://",
     host: "localhost",
