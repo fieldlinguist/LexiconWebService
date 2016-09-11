@@ -12,7 +12,7 @@ var router = express.Router();
  * @param  {Request} req
  * @param  {Response} res
  */
-function trainLexicon(req, res) {
+function trainLexicon(req, res, next) {
   debug("POST", req.params);
 
   var pouchname = req.params.pouchname;
@@ -21,6 +21,11 @@ function trainLexicon(req, res) {
   couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
   makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
+    debug("requested training data", result);
+    if (!result || result instanceof Error || !result.rows) {
+      return next(result);
+    }
+
     res.send(result);
   });
 }
