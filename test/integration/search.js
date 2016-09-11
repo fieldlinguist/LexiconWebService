@@ -4,9 +4,9 @@ var supertest = require("supertest");
 
 var api = require("../../");
 
-describe("/v1", function() {
+describe.only("/v1", function() {
   describe("search", function() {
-    it.only("should search a database", function(done) {
+    it("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -31,15 +31,40 @@ describe("/v1", function() {
             });
           } else if (res.status === 500) {
             expect(res.status).to.equal(500);
-            expect(res.body).to.deep.equal({
-              message: 'connect ECONNREFUSED 127.0.0.1:3195',
-              error: {},
-              status: 500
-            });
-          } else {
-            expect(res.status).to.equal(500);
-            expect(res.body).to.deep.equal({});
+            if (res.body.message.indexOf('ECONNREFUSED') > -1) {
+              expect(res.body).to.deep.equal({
+                message: 'connect ECONNREFUSED 127.0.0.1:3195',
+                error: {},
+                status: 500
+              });
+            } else {
+              expect(res.body).to.deep.equal({
+                message: 'Unknown cluster.',
+                error: {},
+                status: 500
+              });
+            }
           }
+
+          if (res.status === 201) {
+            expect(res.status).to.equal(201);
+          } else {
+            expect(res.status).to.equal(200);
+          }
+
+
+          expect(res.body).to.have.keys([
+            "took",
+            "timed_out",
+            "_shards",
+            "hits"
+          ]);
+
+          expect(res.body.hits).to.have.keys([
+            "total",
+            "max_score",
+            "hits"
+          ]);
 
           done();
         });
@@ -58,32 +83,23 @@ describe("/v1", function() {
             return done(err);
           }
 
-          // Travis doesnt have a local lexicon
-          if (!res.body.rows) {
-            expect(res.status).to.equal(500);
-            console.log(res.body);
-            expect(res.body).to.deep.equal({
-              message: "connect ECONNREFUSED 127.0.0.1:5984",
-              error: {},
-              status: 500
-            });
-
-            return done();
+          if (res.status >= 400) {
+            throw res.body;
           }
 
-          expect(res.body).to.have.keys([
+          expect(res.body.couchDBResult).to.have.keys([
             "offset",
             "rows",
             "total_rows"
           ]);
 
-          expect(res.body.rows[0]).to.have.keys([
+          expect(res.body.couchDBResult.rows[0]).to.have.keys([
             "id",
             "key",
             "value"
           ]);
 
-          expect(res.body.rows[0].key).to.have.keys([
+          expect(res.body.couchDBResult.rows[0].key).to.have.keys([
             "judgement",
             "utterance",
             "morphemes",
@@ -100,7 +116,7 @@ describe("/v1", function() {
             "notesFromOldDB"
           ]);
 
-          expect(res.body.rows[0].id).to.equal(res.body.rows[0].value);
+          expect(res.body.couchDBResult.rows[0].id).to.equal(res.body.couchDBResult.rows[0].value);
           done();
         });
     });
@@ -116,32 +132,23 @@ describe("/v1", function() {
             return done(err);
           }
 
-          // Travis doesnt have a local lexicon
-          if (!res.body.rows) {
-            expect(res.status).to.equal(500);
-            console.log(res.body);
-            expect(res.body).to.deep.equal({
-              message: "connect ECONNREFUSED 127.0.0.1:5984",
-              error: {},
-              status: 500
-            });
-
-            return done();
+          if (res.status >= 400) {
+            throw res.body;
           }
 
-          expect(res.body).to.have.keys([
+          expect(res.body.couchDBResult).to.have.keys([
             "offset",
             "rows",
             "total_rows"
           ]);
 
-          expect(res.body.rows[0]).to.have.keys([
+          expect(res.body.couchDBResult.rows[0]).to.have.keys([
             "id",
             "key",
             "value"
           ]);
 
-          expect(res.body.rows[3].key).to.have.keys([
+          expect(res.body.couchDBResult.rows[3].key).to.have.keys([
             "orthography",
             "utterance",
             "morphemes",
@@ -156,7 +163,21 @@ describe("/v1", function() {
             "modifiedByUser"
           ]);
 
-          expect(res.body.rows[0].id).to.equal(res.body.rows[0].value);
+          expect(res.body.couchDBResult.rows[0].id).to.equal(res.body.couchDBResult.rows[0].value);
+
+          expect(res.body.elasticSearchResult).to.deep.equal({
+            _index: 'testinglexicon-kartuli',
+            _type: 'datum',
+            _id: res.body.elasticSearchResult._id,
+            _version: res.body.elasticSearchResult._version,
+            _shards: {
+              total: 2,
+              successful: res.body.elasticSearchResult._shards.successful,
+              failed: 0
+            },
+            created: res.body.elasticSearchResult.created
+          });
+
           done();
         });
     });

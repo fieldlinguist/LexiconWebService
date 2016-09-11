@@ -36,15 +36,13 @@ function querySearch(req, res, next) {
   }
   var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
 
-  var searchoptions = JSON.parse(JSON.stringify(config.searchOptions));
-  searchoptions.path = "/" + dbname + "/datums/_search";
-  searchoptions.headers = {
-    "Content-Type": "application/json",
-    "Content-Length": Buffer.byteLength(elasticsearchTemplateString, "utf8")
-  };
+  var searchOptions = JSON.parse(JSON.stringify(config.searchOptions));
+  searchOptions.data = elasticsearchTemplateString;
+  searchOptions.path = "/" + dbname + "/data/_search";
+
   debug(elasticsearchTemplateString);
 
-  makeJSONRequest(searchoptions, elasticsearchTemplateString, function(status, result) {
+  makeJSONRequest(searchOptions, function(status, result) {
     debug("requested search result", result);
     if (status >= 400 || !result || result instanceof Error) {
       return next(result);
@@ -57,30 +55,47 @@ function querySearch(req, res, next) {
 
 /**
  * Re-index a database
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
+ *
  * @param  {Request} req
  * @param  {Response} res
+ * @param  {Function} next
  */
 function indexDatabase(req, res, next) {
   debug("POST", req.params);
 
   var dbname = req.params.dbname;
-  var couchoptions = JSON.parse(JSON.stringify(config.corpusOptions));
-  couchoptions.path = "/" + dbname + "/_design/search/_view/searchable";
-  couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
+  var couchDBOptions = JSON.parse(JSON.stringify(config.corpusOptions));
+  couchDBOptions.path = "/" + dbname + "/_design/search/_view/searchable?limit=4";
+  couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
-  makeJSONRequest(couchoptions, undefined, function(status, result) {
-    debug("requested training data", result);
-    if (status >= 400 || !result || result instanceof Error || !result.rows) {
-      return next(result);
+  makeJSONRequest(couchDBOptions, function(status, couchDBResult) {
+    debug("requested training data", couchDBResult);
+    if (status >= 400 || !couchDBResult || couchDBResult instanceof Error || !couchDBResult.rows) {
+      return next(couchDBResult);
     }
-    // TODO use this to train the serach engine, so far it might be doing it in the fielddbwebserver
-    result.rows.map(function(row) {
+    couchDBResult.rows.map(function(row) {
       debug("indexing ", row);
-
-
     });
 
-    res.json(result);
+    var data = couchDBResult.rows[0];
+    var searchOptions = JSON.parse(JSON.stringify(config.searchOptions));
+    searchOptions.method = "POST";
+    searchOptions.data = data.key;
+    searchOptions.path = "/" + dbname + "/datum/" + data.id;
+
+    makeJSONRequest(searchOptions, function(status, elasticSearchResult) {
+      debug("index search elasticSearchResult", elasticSearchResult);
+      if (status >= 400 || !elasticSearchResult || elasticSearchResult instanceof Error) {
+        return next(elasticSearchResult);
+      }
+
+      res.status(status);
+      res.json({
+        couchDBResult: couchDBResult,
+        elasticSearchResult: elasticSearchResult
+      });
+    });
   });
 }
 
