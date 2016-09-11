@@ -1,20 +1,6 @@
+var url = require("url");
+
 module.exports = {
-  corpusOptions: {
-    protocol: "http://",
-    host: "localhost",
-    defaultPort: "5984",
-    mehod: "GET",
-    path: "",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  },
-  searchOptions: {
-    protocol: "http://",
-    defaultPort: "3195",
-    host: "localhost",
-    path: "/default/datums/_search",
-    method: "POST",
-    headers: ""
-  }
+  corpusOptions: url.parse("http://public:none@localhost:5984"),
+  searchOptions: url.parse("http://admin:none@localhost:3195/public/data")
 };

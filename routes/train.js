@@ -20,7 +20,7 @@ function trainLexicon(req, res, next) {
   couchoptions.path = "/" + pouchname + "/_design/deprecated/_view/get_datum_fields";
   couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
-  makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
+  makeJSONRequest(couchoptions, function(statusCode, result) {
     debug("requested training data", result);
     if (!result || result instanceof Error || !result.rows) {
       return next(result);
