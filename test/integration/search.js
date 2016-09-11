@@ -4,7 +4,7 @@ var supertest = require("supertest");
 
 var api = require("../../");
 
-describe.only("/v1", function() {
+describe("/v1", function() {
   describe("search", function() {
     it("should search a database", function(done) {
       this.timeout(10 * 1000);
@@ -25,33 +25,26 @@ describe.only("/v1", function() {
           if (res.status === 401) {
             expect(res.status).to.equal(401);
             expect(res.body).to.deep.equal({
-              message: 'action [indices:data/read/search] requires authentication',
+              message: "action [indices:data/read/search] requires authentication",
               error: {},
               status: 401
             });
           } else if (res.status === 500) {
             expect(res.status).to.equal(500);
-            if (res.body.message.indexOf('ECONNREFUSED') > -1) {
+            if (res.body.message.indexOf("ECONNREFUSED") > -1) {
               expect(res.body).to.deep.equal({
-                message: 'connect ECONNREFUSED 127.0.0.1:3195',
+                message: "connect ECONNREFUSED 127.0.0.1:9200",
                 error: {},
                 status: 500
               });
             } else {
               expect(res.body).to.deep.equal({
-                message: 'Unknown cluster.',
+                message: "Unknown cluster.",
                 error: {},
                 status: 500
               });
             }
           }
-
-          if (res.status === 201) {
-            expect(res.status).to.equal(201);
-          } else {
-            expect(res.status).to.equal(200);
-          }
-
 
           expect(res.body).to.have.keys([
             "took",
@@ -121,7 +114,7 @@ describe.only("/v1", function() {
         });
     });
 
-    it("should re-index a media heavy database", function(done) {
+    it.only("should re-index a media heavy database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -165,21 +158,29 @@ describe.only("/v1", function() {
 
           expect(res.body.couchDBResult.rows[0].id).to.equal(res.body.couchDBResult.rows[0].value);
 
+          console.log(res.body.elasticSearchResult);
+
           expect(res.body.elasticSearchResult).to.deep.equal({
-            _index: 'testinglexicon-kartuli',
-            _type: 'datum',
-            _id: res.body.elasticSearchResult._id,
-            _version: res.body.elasticSearchResult._version,
-            _shards: {
-              total: 2,
-              successful: res.body.elasticSearchResult._shards.successful,
-              failed: 0
-            },
-            created: res.body.elasticSearchResult.created
+            took: res.body.elasticSearchResult.took,
+            errors: false,
+            items: [{
+              index: {
+                "_id": res.body.elasticSearchResult.items[0].index._id,
+                "_index": "testinglexicon-kartuli",
+                "_shards": {
+                  "failed": 0,
+                  "successful": 1,
+                  "total": 2
+                },
+                "_type": "type1",
+                "_version": res.body.elasticSearchResult.items[0].index._version,
+                "status": res.body.elasticSearchResult.items[0].index.status
+              }
+            }]
           });
 
           done();
         });
     });
-  })
+  });
 });
