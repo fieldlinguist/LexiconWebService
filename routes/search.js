@@ -13,7 +13,7 @@ var router = express.Router();
  * @param  {Request} req
  * @param  {Response} res
  */
-function querySearch(req, res) {
+function querySearch(req, res, next) {
   debug("POST", req.params);
 
   console.log(req.body);
@@ -24,12 +24,14 @@ function querySearch(req, res) {
     console.log("Trimming string " + queryString);
   }
   if (!queryString) {
-    res.send("400", []);
+    res.status(400);
+    res.json([]);
     return;
   }
   var queryTokens = search.processQueryString(queryString);
   if (!queryTokens || queryTokens.length === 0) {
-    res.send("400", []);
+    res.status(400);
+    res.json([]);
     return;
   }
   var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
@@ -40,10 +42,16 @@ function querySearch(req, res) {
     "Content-Type": "application/json",
     "Content-Length": Buffer.byteLength(elasticsearchTemplateString, "utf8")
   };
+  debug(elasticsearchTemplateString);
 
-  makeJSONRequest(searchoptions, elasticsearchTemplateString, function(statusCode, results) {
-    console.log(elasticsearchTemplateString);
-    res.send(statusCode, results);
+  makeJSONRequest(searchoptions, elasticsearchTemplateString, function(status, result) {
+    debug("requested search result", result);
+    if (status >= 400 || !result || result instanceof Error) {
+      return next(result);
+    }
+
+    res.status(status);
+    res.json(result);
   });
 }
 
@@ -60,9 +68,9 @@ function indexDatabase(req, res, next) {
   couchoptions.path = "/" + pouchname + "/_design/search/_view/searchable";
   couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
-  makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
+  makeJSONRequest(couchoptions, undefined, function(status, result) {
     debug("requested training data", result);
-    if (!result || result instanceof Error || !result.rows) {
+    if (status >= 400 || !result || result instanceof Error || !result.rows) {
       return next(result);
     }
     // TODO use this to train the serach engine, so far it might be doing it in the fielddbwebserver
@@ -72,7 +80,7 @@ function indexDatabase(req, res, next) {
 
     });
 
-    res.send(result);
+    res.json(result);
   });
 }
 

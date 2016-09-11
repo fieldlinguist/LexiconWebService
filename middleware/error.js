@@ -29,10 +29,14 @@ function errors(err, req, res, next) {
     data.status = 403;
   }
 
+  if (!data.message && err.error) {
+    data.message = err.error.reason
+  }
+
   res.status(data.status);
-  if (typeof res.json === "function"){
+  if (typeof res.json === "function") {
     res.json(data);
-  } else if (typeof req.json === "function"){
+  } else if (typeof req.json === "function") {
     req.json(data);
   }
 }

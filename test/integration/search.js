@@ -6,13 +6,13 @@ var api = require("../../");
 
 describe("/v1", function() {
   describe("search", function() {
-    it("should search a database", function(done) {
+    it.only("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
         .post("/search/testinglexicon-kartuli")
         .send({
-          value: "morphemes:shi"
+          value: "utterance:ar"
         })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
@@ -21,14 +21,25 @@ describe("/v1", function() {
           }
 
           console.log(res.body);
-          expect(res.status).to.equal(500);
-          expect(res.body).to.deep.equal({
-            code: "ECONNREFUSED",
-            errno: "ECONNREFUSED",
-            syscall: "connect",
-            address: "127.0.0.1",
-            port: 3195
-          });
+
+          if (res.status === 401) {
+            expect(res.status).to.equal(401);
+            expect(res.body).to.deep.equal({
+              message: 'action [indices:data/read/search] requires authentication',
+              error: {},
+              status: 401
+            });
+          } else if (res.status === 500) {
+            expect(res.status).to.equal(500);
+            expect(res.body).to.deep.equal({
+              message: 'connect ECONNREFUSED 127.0.0.1:3195',
+              error: {},
+              status: 500
+            });
+          } else {
+            expect(res.status).to.equal(500);
+            expect(res.body).to.deep.equal({});
+          }
 
           done();
         });
@@ -94,7 +105,7 @@ describe("/v1", function() {
         });
     });
 
-    it.only("should re-index a media heavy database", function(done) {
+    it("should re-index a media heavy database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
