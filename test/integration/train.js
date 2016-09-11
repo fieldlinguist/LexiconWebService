@@ -6,7 +6,7 @@ var api = require("../../");
 
 describe("/v1", function() {
   describe("train", function() {
-    it.only("should train a lexicon", function(done) {
+    it("should train a lexicon", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)

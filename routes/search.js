@@ -47,8 +47,39 @@ function querySearch(req, res) {
   });
 }
 
+/**
+ * Re-index a database
+ * @param  {Request} req
+ * @param  {Response} res
+ */
+function indexDatabase(req, res, next) {
+  debug("POST", req.params);
+
+  var pouchname = req.params.pouchname;
+  var couchoptions = JSON.parse(JSON.stringify(config.corpusOptions));
+  couchoptions.path = "/" + pouchname + "/_design/search/_view/searchable";
+  couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
+
+  makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
+    debug("requested training data", result);
+    if (!result || result instanceof Error || !result.rows) {
+      return next(result);
+    }
+    // TODO use this to train the serach engine, so far it might be doing it in the fielddbwebserver
+    result.rows.map(function(row) {
+      debug("indexing ", row);
+
+
+    });
+
+    res.send(result);
+  });
+}
+
+router.post("/:pouchname/index", indexDatabase);
 router.post("/:pouchname", querySearch);
 
 module.exports.querySearch = querySearch;
+module.exports.indexDatabase = indexDatabase;
 
 module.exports.router = router;
