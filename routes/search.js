@@ -17,7 +17,7 @@ function querySearch(req, res, next) {
   debug("POST", req.params);
 
   console.log(req.body);
-  var pouchname = req.params.pouchname;
+  var dbname = req.params.dbname;
   var queryString = req.body.value;
   if (queryString && typeof queryString.trim === "function") {
     queryString = queryString.trim();
@@ -37,7 +37,7 @@ function querySearch(req, res, next) {
   var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
 
   var searchoptions = JSON.parse(JSON.stringify(config.searchOptions));
-  searchoptions.path = "/" + pouchname + "/datums/_search";
+  searchoptions.path = "/" + dbname + "/datums/_search";
   searchoptions.headers = {
     "Content-Type": "application/json",
     "Content-Length": Buffer.byteLength(elasticsearchTemplateString, "utf8")
@@ -63,9 +63,9 @@ function querySearch(req, res, next) {
 function indexDatabase(req, res, next) {
   debug("POST", req.params);
 
-  var pouchname = req.params.pouchname;
+  var dbname = req.params.dbname;
   var couchoptions = JSON.parse(JSON.stringify(config.corpusOptions));
-  couchoptions.path = "/" + pouchname + "/_design/search/_view/searchable";
+  couchoptions.path = "/" + dbname + "/_design/search/_view/searchable";
   couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
   makeJSONRequest(couchoptions, undefined, function(status, result) {
@@ -84,8 +84,8 @@ function indexDatabase(req, res, next) {
   });
 }
 
-router.post("/:pouchname/index", indexDatabase);
-router.post("/:pouchname", querySearch);
+router.post("/:dbname/index", indexDatabase);
+router.post("/:dbname", querySearch);
 
 module.exports.querySearch = querySearch;
 module.exports.indexDatabase = indexDatabase;
