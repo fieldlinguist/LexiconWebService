@@ -1,4 +1,5 @@
 module.exports = {
+  "took": 1,
   "timed_out": false,
   "_shards": {
     "total": 1,
@@ -98,6 +99,7 @@ module.exports = {
         }
       }
     },
+    "fielddata_fields": "doc_values",
     "from": 0,
     "size": 50,
     "sort": [],

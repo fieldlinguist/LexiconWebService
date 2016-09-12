@@ -156,7 +156,7 @@ describe("/v1", function() {
   });
 
   describe("search", function() {
-    it("should search a database", function(done) {
+    it.only("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -196,9 +196,8 @@ describe("/v1", function() {
             }
           }
 
-          delete res.body.took;
-
           console.log(JSON.stringify(res.body, null, 2));
+          delete res.body.took;
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
           done();
