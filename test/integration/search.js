@@ -162,8 +162,8 @@ describe("/v1", function() {
       supertest(api)
         .post("/search/testinglexicon-kartuli")
         .send({
-          // value: "orthography:არ OR translation:not"
-          value: "orthography:არ"
+          value: "orthography:არ OR translation:don't"
+          // value: "orthography:არ"
         })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
