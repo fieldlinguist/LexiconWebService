@@ -1,4 +1,5 @@
 "use strict";
+var config = require("config");
 var expect = require("chai").expect;
 var supertest = require("supertest");
 
@@ -38,7 +39,10 @@ fixtures.search.index.quechua.items.map(function(item) {
   delete item.index._shards.successful; // successful will match the number of shards
 });
 
-describe.only("/v1", function() {
+delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.creation_date;
+delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.uuid;
+
+describe("/v1", function() {
   it("should use fixtures", function() {
     expect(fixtures.search).to.be.an("object");
     expect(fixtures.search.index).to.be.an("object");
@@ -123,13 +127,16 @@ describe.only("/v1", function() {
           expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
           // look at the index properties
-          supertest("http://localhost:9200")
+          supertest(config.search.url)
             .get("/testinglexicon-kartuli")
             .end(function(err, res) {
               if (err) {
                 return done(err);
               }
+
               console.log(JSON.stringify(res.body, null, 2));
+              delete res.body["testinglexicon-kartuli"].settings.index.creation_date;
+              delete res.body["testinglexicon-kartuli"].settings.index.uuid;
               expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
 
               done();
@@ -139,7 +146,7 @@ describe.only("/v1", function() {
   });
 
   describe("search", function() {
-    it.only("should search a database", function(done) {
+    it("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)

@@ -1,8 +1,10 @@
 "use strict";
 
+var config = require("config");
 var debug = require("debug")("routes:train");
 var express = require("express");
-var config = require("config");
+var url = require("url");
+
 var makeJSONRequest = require("../lib/request");
 
 var router = express.Router();
@@ -16,7 +18,7 @@ function trainLexicon(req, res, next) {
   debug("POST", req.params);
 
   var pouchname = req.params.pouchname;
-  var couchoptions = JSON.parse(JSON.stringify(config.corpusOptions));
+  var couchoptions = url.parse(config.corpus.url);
   couchoptions.path = "/" + pouchname + "/_design/lexicon/_view/lexiconNodes?group=true&limit=4";
   couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 

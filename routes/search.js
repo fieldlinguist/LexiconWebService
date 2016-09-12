@@ -1,8 +1,10 @@
 "use strict";
 
+var config = require("config");
 var debug = require("debug")("routes:search");
 var express = require("express");
-var config = require("config");
+var url = require("url");
+
 var search = require("../lib/search");
 var makeJSONRequest = require("../lib/request");
 
@@ -36,7 +38,7 @@ function querySearch(req, res, next) {
   }
   var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
 
-  var searchOptions = JSON.parse(JSON.stringify(config.searchOptions));
+  var searchOptions = url.parse(config.search.url);
   searchOptions.data = elasticsearchTemplateString;
   searchOptions.path = "/" + dbname + "/datum/_search";
 
@@ -66,7 +68,7 @@ function indexDatabase(req, res, next) {
   debug("POST", req.params);
 
   var dbname = req.params.dbname;
-  var couchDBOptions = JSON.parse(JSON.stringify(config.corpusOptions));
+  var couchDBOptions = url.parse(config.corpus.url);
   couchDBOptions.path = "/" + dbname + "/_design/search/_view/searchable?limit=4";
   couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
@@ -94,7 +96,7 @@ function indexDatabase(req, res, next) {
     data = data.map(JSON.stringify).join("\n") + "\n";
     debug("re-indexing ", data);
 
-    var searchOptions = JSON.parse(JSON.stringify(config.searchOptions));
+    var searchOptions = url.parse(config.search.url);
     searchOptions.method = "POST";
     searchOptions.data = data;
     searchOptions.path = "/" + dbname + "/datum/_bulk";

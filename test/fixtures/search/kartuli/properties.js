@@ -23,9 +23,6 @@ module.exports = {
           "enteredByUser": {
             "type": "string"
           },
-          "field1": {
-            "type": "string"
-          },
           "gloss": {
             "type": "string"
           },
@@ -67,19 +64,12 @@ module.exports = {
             "type": "string"
           }
         }
-      },
-      "type1": {
-        "properties": {
-          "field1": {
-            "type": "string"
-          }
-        }
       }
     },
     "settings": {
       "index": {
         "creation_date": "1473635826394",
-        "number_of_shards": "5",
+        "number_of_shards": "1",
         "number_of_replicas": "1",
         "uuid": "eVi-y1qgSfmodtEpj8nD0Q",
         "version": {
