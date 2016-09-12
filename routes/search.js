@@ -38,7 +38,7 @@ function querySearch(req, res, next) {
 
   var searchOptions = JSON.parse(JSON.stringify(config.searchOptions));
   searchOptions.data = elasticsearchTemplateString;
-  searchOptions.path = "/" + dbname + "/data/_search";
+  searchOptions.path = "/" + dbname + "/datum/_search";
 
   debug(elasticsearchTemplateString);
 
