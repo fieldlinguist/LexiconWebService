@@ -72,7 +72,7 @@ function indexDatabase(req, res, next) {
 
   makeJSONRequest(couchDBOptions, function(status, couchDBResult) {
     debug("requested training data", couchDBResult);
-    if (status >= 400 || !couchDBResult || couchDBResult instanceof Error || !couchDBResult.rows) {
+    if (status >= 400 || !couchDBResult || couchDBResult instanceof Error || !couchDBResult.rows || couchDBResult.reason) {
       return next(couchDBResult);
     }
 

@@ -31,7 +31,6 @@ fixtures.search.index.kartuli.items.map(function(item) {
   delete item.index.status; // status might be 201 created or 200 updated
 });
 
-
 describe("/v1", function() {
   it("should use fixtures", function() {
     expect(fixtures.search).to.be.an("object");

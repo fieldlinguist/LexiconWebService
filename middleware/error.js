@@ -29,8 +29,14 @@ function errors(err, req, res, next) {
     data.status = 403;
   }
 
+  // support errors from elastic search
   if (!data.message && err.error) {
     data.message = err.error.reason;
+  }
+
+  // support errors from couchdb
+  if (!data.message && err.reason) {
+    data.message = err.reason;
   }
 
   res.status(data.status);
