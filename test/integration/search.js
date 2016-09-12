@@ -38,14 +38,19 @@ describe("/v1", function() {
     expect(fixtures.search.index).to.be.an("object");
     expect(fixtures.search.index.kartuli).to.be.an("object");
     expect(fixtures.search.index.quechua).to.be.an("object");
+
+    expect(fixtures.search.index.kartuli.items).to.be.an("array");
+    expect(fixtures.search.index.quechua.items).to.be.an("array");
+
     expect(fixtures.search.query.kartuli).to.be.an("object");
     expect(fixtures.search.query.kartuli.hits).to.be.an("object");
 
     expect(fixtures.database).to.be.an("object");
     expect(fixtures.database.kartuli).to.be.an("object");
-    expect(fixtures.database.kartuli.rows).to.be.an("array");
     expect(fixtures.database.quechua).to.be.an("object");
-    // expect(fixtures.database.quechua.rows).to.be.an("array");
+
+    expect(fixtures.database.kartuli.rows).to.be.an("array");
+    expect(fixtures.database.quechua.rows).to.be.an("array");
   });
 
   describe("search", function() {
@@ -132,7 +137,7 @@ describe("/v1", function() {
         });
     });
 
-    it.only("should re-index a media heavy database", function(done) {
+    it("should re-index a media heavy database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
