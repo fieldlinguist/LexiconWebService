@@ -9,6 +9,9 @@ var fixtures = {
       kartuli: require("../fixtures/search/kartuli/index"),
       quechua: require("../fixtures/search/quechua/index")
     },
+    properties: {
+      kartuli: require("../fixtures/search/kartuli/properties")
+    },
     query: {
       kartuli: require("../fixtures/search/kartuli/utterance:ar")
     }
@@ -46,7 +49,7 @@ describe("/v1", function() {
   });
 
   describe("search", function() {
-    it.only("should search a database", function(done) {
+    it("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -129,7 +132,7 @@ describe("/v1", function() {
         });
     });
 
-    it("should re-index a media heavy database", function(done) {
+    it.only("should re-index a media heavy database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -157,7 +160,18 @@ describe("/v1", function() {
           console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
           expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
-          done();
+          // look at the index properties
+          supertest('http://localhost:9200')
+            .get('/testinglexicon-kartuli')
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              console.log(JSON.stringify(res.body, null, 2));
+              expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
+
+              done();
+            });
         });
     });
   });
