@@ -69,8 +69,8 @@ module.exports = {
     "settings": {
       "index": {
         "creation_date": "1473635826394",
-        "numberOfShards": "1",
-        "numberOfReplicas": "1",
+        "number_of_shards": "1",
+        "number_of_replicas": "1",
         "uuid": "eVi-y1qgSfmodtEpj8nD0Q",
         "version": {
           "created": "2040099"

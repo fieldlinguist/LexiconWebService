@@ -42,7 +42,7 @@ fixtures.search.index.quechua.items.map(function(item) {
 delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.creation_date;
 delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.uuid;
 
-describe.only("/v1", function() {
+describe("/v1", function() {
   it("should use fixtures", function() {
     expect(fixtures.search).to.be.an("object");
     expect(fixtures.search.index).to.be.an("object");
@@ -136,6 +136,14 @@ describe.only("/v1", function() {
               console.log(JSON.stringify(res.body, null, 2));
               delete res.body["testinglexicon-kartuli"].settings.index.creation_date;
               delete res.body["testinglexicon-kartuli"].settings.index.uuid;
+              if (res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas) {
+                res.body["testinglexicon-kartuli"].settings.index.number_of_replicas = res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas;
+                delete res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas;
+              }
+              if (res.body["testinglexicon-kartuli"].settings.index.numberOfShards) {
+                res.body["testinglexicon-kartuli"].settings.index.number_of_shards = res.body["testinglexicon-kartuli"].settings.index.numberOfShards;
+                delete res.body["testinglexicon-kartuli"].settings.index.numberOfShards;
+              }
               expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
 
               console.log(JSON.stringify(elasticSearchResult, null, 2));
