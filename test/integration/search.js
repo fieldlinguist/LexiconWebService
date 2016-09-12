@@ -29,9 +29,16 @@ delete fixtures.search.query.kartuli.took;
 fixtures.search.index.kartuli.items.map(function(item) {
   delete item.index._version; // version will increase on each request
   delete item.index.status; // status might be 201 created or 200 updated
+  delete item.index._shards.successful; // successful will match the number of shards
 });
 
-describe("/v1", function() {
+fixtures.search.index.quechua.items.map(function(item) {
+  delete item.index._version; // version will increase on each request
+  delete item.index.status; // status might be 201 created or 200 updated
+  delete item.index._shards.successful; // successful will match the number of shards
+});
+
+describe.only("/v1", function() {
   it("should use fixtures", function() {
     expect(fixtures.search).to.be.an("object");
     expect(fixtures.search.index).to.be.an("object");
@@ -52,8 +59,87 @@ describe("/v1", function() {
     expect(fixtures.database.quechua.rows).to.be.an("array");
   });
 
+  describe("indexing", function() {
+    it("should re-index a metadata heavy database", function(done) {
+      this.timeout(10 * 1000);
+
+      supertest(api)
+        .post("/search/testinglexicon-quechua/index")
+        .expect("Content-Type", "application/json; charset=utf-8")
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          if (res.status >= 400) {
+            throw res.body;
+          }
+
+          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
+          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.quechua);
+
+          // could take 5 or 6 ms
+          delete res.body.elasticSearchResult.took;
+
+          res.body.elasticSearchResult.items.map(function(item) {
+            delete item.index._version; // version will increase on each request
+            delete item.index.status; // status might be 201 created or 200 updated
+            delete item.index._shards.successful; // successful will match the number of shards
+          });
+          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
+          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.quechua);
+
+          done();
+        });
+    });
+
+    it("should re-index a media heavy database", function(done) {
+      this.timeout(10 * 1000);
+
+      supertest(api)
+        .post("/search/testinglexicon-kartuli/index")
+        .expect("Content-Type", "application/json; charset=utf-8")
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          if (res.status >= 400) {
+            throw res.body;
+          }
+
+          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
+          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.kartuli);
+
+          // could take 5 or 6 ms
+          delete res.body.elasticSearchResult.took;
+
+          res.body.elasticSearchResult.items.map(function(item) {
+            delete item.index._version; // version will increase on each request
+            delete item.index.status; // status might be 201 created or 200 updated
+            delete item.index._shards.successful; // successful will match the number of shards
+          });
+          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
+          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
+
+          // look at the index properties
+          supertest("http://localhost:9200")
+            .get("/testinglexicon-kartuli")
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              console.log(JSON.stringify(res.body, null, 2));
+              expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
+
+              done();
+            });
+        });
+    });
+  });
+
   describe("search", function() {
-    it("should search a database", function(done) {
+    it.only("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -99,83 +185,6 @@ describe("/v1", function() {
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
           done();
-        });
-    });
-  });
-
-  describe("indexing", function() {
-    it("should re-index a metadata heavy database", function(done) {
-      this.timeout(10 * 1000);
-
-      supertest(api)
-        .post("/search/testinglexicon-quechua/index")
-        .expect("Content-Type", "application/json; charset=utf-8")
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-
-          if (res.status >= 400) {
-            throw res.body;
-          }
-
-          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
-          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.quechua);
-
-          // could take 5 or 6 ms
-          delete res.body.elasticSearchResult.took;
-
-          res.body.elasticSearchResult.items.map(function(item) {
-            delete item.index._version; // version will increase on each request
-            delete item.index.status; // status might be 201 created or 200 updated
-          });
-          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
-          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.quechua);
-
-          done();
-        });
-    });
-
-    it("should re-index a media heavy database", function(done) {
-      this.timeout(10 * 1000);
-
-      supertest(api)
-        .post("/search/testinglexicon-kartuli/index")
-        .expect("Content-Type", "application/json; charset=utf-8")
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-
-          if (res.status >= 400) {
-            throw res.body;
-          }
-
-          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
-          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.kartuli);
-
-          // could take 5 or 6 ms
-          delete res.body.elasticSearchResult.took;
-
-          res.body.elasticSearchResult.items.map(function(item) {
-            delete item.index._version; // version will increase on each request
-            delete item.index.status; // status might be 201 created or 200 updated
-          });
-          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
-          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
-
-          // look at the index properties
-          supertest("http://localhost:9200")
-            .get("/testinglexicon-kartuli")
-            .end(function(err, res) {
-              if (err) {
-                return done(err);
-              }
-              console.log(JSON.stringify(res.body, null, 2));
-              expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
-
-              done();
-            });
         });
     });
   });
