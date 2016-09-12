@@ -10,5 +10,18 @@ module.exports = {
     "total": 0,
     "max_score": null,
     "hits": []
+  },
+  "original": {
+    "query": {
+      "fuzzy": {
+        "utterance": {
+          "value": "ar"
+        }
+      }
+    },
+    "from": 0,
+    "size": 50,
+    "sort": [],
+    "facets": {}
   }
 };

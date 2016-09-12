@@ -21,6 +21,7 @@ var fixtures = {
 
 // could take 5 or 6 ms
 delete fixtures.search.index.kartuli.took;
+delete fixtures.search.query.kartuli.took;
 
 fixtures.search.index.kartuli.items.map(function(item) {
   delete item.index._version; // version will increase on each request
@@ -34,6 +35,8 @@ describe("/v1", function() {
     expect(fixtures.search.index).to.be.an("object");
     expect(fixtures.search.index.kartuli).to.be.an("object");
     expect(fixtures.search.index.quechua).to.be.an("object");
+    expect(fixtures.search.query.kartuli).to.be.an("object");
+    expect(fixtures.search.query.kartuli.hits).to.be.an("object");
 
     expect(fixtures.database).to.be.an("object");
     expect(fixtures.database.kartuli).to.be.an("object");
@@ -43,7 +46,7 @@ describe("/v1", function() {
   });
 
   describe("search", function() {
-    it("should search a database", function(done) {
+    it.only("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -83,8 +86,10 @@ describe("/v1", function() {
             }
           }
 
+          delete res.body.took;
+
           console.log(JSON.stringify(res.body, null, 2));
-          expect(res.body).to.deep.equal(fixtures.search.kartuli.query);
+          expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
           done();
         });

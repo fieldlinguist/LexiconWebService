@@ -49,6 +49,7 @@ function querySearch(req, res, next) {
     }
 
     res.status(status);
+    result.original = elasticsearchTemplateString;
     res.json(result);
   });
 }
