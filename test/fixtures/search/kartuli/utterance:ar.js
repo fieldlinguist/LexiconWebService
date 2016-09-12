@@ -67,6 +67,10 @@ module.exports = {
           }
         }]
       }
-    }
+    },
+    'fielddata_fields': 'doc_values',
+    'from': 0,
+    'size': 50,
+    'sort': []
   }
 };
