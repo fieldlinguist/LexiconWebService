@@ -42,7 +42,7 @@ fixtures.search.index.quechua.items.map(function(item) {
 delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.creation_date;
 delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.uuid;
 
-describe("/v1", function() {
+describe.only("/v1", function() {
   it("should use fixtures", function() {
     expect(fixtures.search).to.be.an("object");
     expect(fixtures.search.index).to.be.an("object");
@@ -115,16 +115,15 @@ describe("/v1", function() {
           console.log(JSON.stringify(res.body.couchDBResult, null, 2));
           expect(res.body.couchDBResult).to.deep.equal(fixtures.database.kartuli);
 
+          var elasticSearchResult = res.body.elasticSearchResult;
           // could take 5 or 6 ms
-          delete res.body.elasticSearchResult.took;
+          delete elasticSearchResult.took;
 
-          res.body.elasticSearchResult.items.map(function(item) {
+          elasticSearchResult.items.map(function(item) {
             delete item.index._version; // version will increase on each request
             delete item.index.status; // status might be 201 created or 200 updated
             delete item.index._shards.successful; // successful will match the number of shards
           });
-          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
-          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
           // look at the index properties
           supertest(config.search.url)
@@ -138,6 +137,9 @@ describe("/v1", function() {
               delete res.body["testinglexicon-kartuli"].settings.index.creation_date;
               delete res.body["testinglexicon-kartuli"].settings.index.uuid;
               expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
+
+              console.log(JSON.stringify(elasticSearchResult, null, 2));
+              expect(elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
               done();
             });

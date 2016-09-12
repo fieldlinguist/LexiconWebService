@@ -1,14 +1,32 @@
 module.exports = {
   "timed_out": false,
   "_shards": {
-    "total": 5,
-    "successful": 5,
+    "total": 1,
+    "successful": 1,
     "failed": 0
   },
   "hits": {
     "total": 4,
     "max_score": 1,
     "hits": [{
+      "_index": "testinglexicon-kartuli",
+      "_type": "datum",
+      "_id": "3328d6a49281e117e859adddcd006168",
+      "_score": 1,
+      "_source": {
+        "translation": "I don't want any, thanks.",
+        "validationStatus": "ToBeElicited",
+        "enteredByUser": "gina",
+        "context": "(efficiently refusing a beach vendor)",
+        "goal": "Sample data for the Learn X screenshots",
+        "consultants": "girl2",
+        "dialect": "Unknown",
+        "language": "Geogian",
+        "dateElicited": "Mar 7, 2013",
+        "user": "gina",
+        "dateSEntered": "2014-03-15T04:49:26.624Z"
+      }
+    }, {
       "_index": "testinglexicon-kartuli",
       "_type": "datum",
       "_id": "3328d6a49281e117e859adddcd026851",
@@ -46,24 +64,6 @@ module.exports = {
         "media": [{
           "filename": "alo.mp3"
         }]
-      }
-    }, {
-      "_index": "testinglexicon-kartuli",
-      "_type": "datum",
-      "_id": "3328d6a49281e117e859adddcd006168",
-      "_score": 1,
-      "_source": {
-        "translation": "I don't want any, thanks.",
-        "validationStatus": "ToBeElicited",
-        "enteredByUser": "gina",
-        "context": "(efficiently refusing a beach vendor)",
-        "goal": "Sample data for the Learn X screenshots",
-        "consultants": "girl2",
-        "dialect": "Unknown",
-        "language": "Geogian",
-        "dateElicited": "Mar 7, 2013",
-        "user": "gina",
-        "dateSEntered": "2014-03-15T04:49:26.624Z"
       }
     }, {
       "_index": "testinglexicon-kartuli",
