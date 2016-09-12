@@ -1,7 +1,7 @@
 "use strict";
 var expect = require("chai").expect;
 var supertest = require("supertest");
-
+var fixtures = require("../fixtures/lexicon/train.js");
 var api = require("../../");
 
 describe("/v1", function() {
@@ -30,36 +30,8 @@ describe("/v1", function() {
             return done();
           }
 
-          expect(res.body).to.have.keys([
-            "offset",
-            "rows",
-            "total_rows"
-          ]);
-
-          expect(res.body.rows[0]).to.have.keys([
-            "id",
-            "key",
-            "value"
-          ]);
-
-          expect(res.body.rows[0].key).to.have.keys([
-            "translation",
-            "validationStatus",
-            "enteredByUser",
-            "context",
-            "goal",
-            "consultants",
-            "dialect",
-            "language",
-            "dateElicited",
-            "user",
-            "dateSEntered",
-            "utterance",
-            "morphemes",
-            "gloss"
-          ]);
-
-          expect(res.body.rows[0].id).to.equal(res.body.rows[0].value);
+          console.log(JSON.stringify(res.body, null, 2));
+          expect(res.body).to.deep.equal(fixtures);
           done();
         });
     });
