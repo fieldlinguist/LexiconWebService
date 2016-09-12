@@ -3,8 +3,45 @@ var expect = require("chai").expect;
 var supertest = require("supertest");
 
 var api = require("../../");
+var fixtures = {
+  search: {
+    index: {
+      kartuli: require("../fixtures/search/kartuli/index"),
+      quechua: require("../fixtures/search/quechua/index")
+    },
+    query: {
+      kartuli: require("../fixtures/search/kartuli/utterance:ar")
+    }
+  },
+  database: {
+    kartuli: require("../fixtures/database/kartuli/searchable"),
+    quechua: require("../fixtures/database/quechua/searchable")
+  }
+};
+
+// could take 5 or 6 ms
+delete fixtures.search.index.kartuli.took;
+
+fixtures.search.index.kartuli.items.map(function(item) {
+  delete item.index._version; // version will increase on each request
+  delete item.index.status; // status might be 201 created or 200 updated
+});
+
 
 describe("/v1", function() {
+  it("should use fixtures", function() {
+    expect(fixtures.search).to.be.an("object");
+    expect(fixtures.search.index).to.be.an("object");
+    expect(fixtures.search.index.kartuli).to.be.an("object");
+    expect(fixtures.search.index.quechua).to.be.an("object");
+
+    expect(fixtures.database).to.be.an("object");
+    expect(fixtures.database.kartuli).to.be.an("object");
+    expect(fixtures.database.kartuli.rows).to.be.an("array");
+    expect(fixtures.database.quechua).to.be.an("object");
+    // expect(fixtures.database.quechua.rows).to.be.an("array");
+  });
+
   describe("search", function() {
     it("should search a database", function(done) {
       this.timeout(10 * 1000);
@@ -46,18 +83,8 @@ describe("/v1", function() {
             }
           }
 
-          expect(res.body).to.have.keys([
-            "took",
-            "timed_out",
-            "_shards",
-            "hits"
-          ]);
-
-          expect(res.body.hits).to.have.keys([
-            "total",
-            "max_score",
-            "hits"
-          ]);
+          console.log(JSON.stringify(res.body, null, 2));
+          expect(res.body).to.deep.equal(fixtures.search.kartuli.query);
 
           done();
         });
@@ -80,41 +107,24 @@ describe("/v1", function() {
             throw res.body;
           }
 
-          expect(res.body.couchDBResult).to.have.keys([
-            "offset",
-            "rows",
-            "total_rows"
-          ]);
+          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
+          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.quechua);
 
-          expect(res.body.couchDBResult.rows[0]).to.have.keys([
-            "id",
-            "key",
-            "value"
-          ]);
+          // could take 5 or 6 ms
+          delete res.body.elasticSearchResult.took;
 
-          expect(res.body.couchDBResult.rows[0].key).to.have.keys([
-            "judgement",
-            "utterance",
-            "morphemes",
-            "gloss",
-            "translation",
-            "tags",
-            "validationStatus",
-            "goal",
-            "consultants",
-            "dialect",
-            "comments",
-            "dateElicited",
-            "modifiedByUser",
-            "notesFromOldDB"
-          ]);
+          res.body.elasticSearchResult.items.map(function(item) {
+            delete item.index._version; // version will increase on each request
+            delete item.index.status; // status might be 201 created or 200 updated
+          });
+          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
+          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.quechua);
 
-          expect(res.body.couchDBResult.rows[0].id).to.equal(res.body.couchDBResult.rows[0].value);
           done();
         });
     });
 
-    it.only("should re-index a media heavy database", function(done) {
+    it("should re-index a media heavy database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
@@ -129,59 +139,18 @@ describe("/v1", function() {
             throw res.body;
           }
 
-          expect(res.body.couchDBResult).to.have.keys([
-            "offset",
-            "rows",
-            "total_rows"
-          ]);
+          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
+          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.kartuli);
 
-          expect(res.body.couchDBResult.rows[0]).to.have.keys([
-            "id",
-            "key",
-            "value"
-          ]);
-
-          expect(res.body.couchDBResult.rows[3].key).to.have.keys([
-            "orthography",
-            "utterance",
-            "morphemes",
-            "gloss",
-            "translation",
-            "media",
-            "tags",
-            "validationStatus",
-            "goal",
-            "dateElicited",
-            "enteredByUser",
-            "modifiedByUser"
-          ]);
-
-          expect(res.body.couchDBResult.rows[0].id).to.equal(res.body.couchDBResult.rows[0].value);
-
-          console.log(res.body.elasticSearchResult);
-
-          expect(res.body.elasticSearchResult).to.deep.equal({
-            took: res.body.elasticSearchResult.took,
-            errors: false,
-            items: res.body.elasticSearchResult.items
-          });
+          // could take 5 or 6 ms
+          delete res.body.elasticSearchResult.took;
 
           res.body.elasticSearchResult.items.map(function(item) {
-            expect(item).to.deep.equal({
-              index: {
-                "_id": item.index._id,
-                "_index": "testinglexicon-kartuli",
-                "_shards": {
-                  "failed": 0,
-                  "successful": 1,
-                  "total": 2
-                },
-                "_type": "datum",
-                "_version": item.index._version,
-                "status": item.index.status
-              }
-            });
+            delete item.index._version; // version will increase on each request
+            delete item.index.status; // status might be 201 created or 200 updated
           });
+          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
+          expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
           done();
         });
