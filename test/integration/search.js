@@ -156,7 +156,7 @@ describe("/v1", function() {
   });
 
   describe("search", function() {
-    it.only("should search a database", function(done) {
+    it("should search a database", function(done) {
       this.timeout(10 * 1000);
 
       supertest(api)
