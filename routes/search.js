@@ -37,12 +37,12 @@ function querySearch(req, res, next) {
     return;
   }
   var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
+  debug(elasticsearchTemplateString);
 
   var searchOptions = url.parse(config.search.url);
+  searchOptions.method = "POST";
   searchOptions.data = elasticsearchTemplateString;
   searchOptions.path = "/" + dbname + "/datum/_search";
-
-  debug(elasticsearchTemplateString);
 
   makeJSONRequest(searchOptions, function(status, result) {
     debug("requested search result", result);

@@ -162,7 +162,8 @@ describe("/v1", function() {
       supertest(api)
         .post("/search/testinglexicon-kartuli")
         .send({
-          value: "utterance:ar"
+          // value: "orthography:არ OR translation:not"
+          value: "orthography:არ"
         })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
@@ -197,6 +198,7 @@ describe("/v1", function() {
           }
 
           console.log(JSON.stringify(res.body, null, 2));
+          expect(res.body.hits.total).to.not.equal(4);
           delete res.body.took;
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
