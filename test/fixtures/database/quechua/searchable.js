@@ -1,3 +1,4 @@
+/* jshint -W100 */
 module.exports = {
   "total_rows": 66,
   "offset": 0,

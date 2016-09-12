@@ -22,7 +22,7 @@ describe("/v1", function() {
             expect(res.status).to.equal(500);
             console.log(res.body);
             expect(res.body).to.deep.equal({
-              message: 'connect ECONNREFUSED 127.0.0.1:5984',
+              message: "connect ECONNREFUSED 127.0.0.1:5984",
               error: {},
               status: 500
             });

@@ -166,8 +166,8 @@ describe("/v1", function() {
           expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
           // look at the index properties
-          supertest('http://localhost:9200')
-            .get('/testinglexicon-kartuli')
+          supertest("http://localhost:9200")
+            .get("/testinglexicon-kartuli")
             .end(function(err, res) {
               if (err) {
                 return done(err);

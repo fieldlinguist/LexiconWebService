@@ -30,7 +30,7 @@ function errors(err, req, res, next) {
   }
 
   if (!data.message && err.error) {
-    data.message = err.error.reason
+    data.message = err.error.reason;
   }
 
   res.status(data.status);
