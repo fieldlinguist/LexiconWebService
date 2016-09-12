@@ -27,7 +27,7 @@ gen
 # Node #
 ########
 lib-cov
-.nyc_output
+coverage
 *.seed
 *.log
 *.csv
