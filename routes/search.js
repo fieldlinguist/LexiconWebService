@@ -68,6 +68,7 @@ function indexDatabase(req, res, next) {
   debug("POST", req.params);
 
   var dbname = req.params.dbname;
+  debug("Config", config, process.env);
   var couchDBOptions = url.parse(config.corpus.url);
   couchDBOptions.path = "/" + dbname + "/_design/search/_view/searchable?limit=4";
   couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;

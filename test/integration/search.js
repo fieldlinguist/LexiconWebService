@@ -75,6 +75,11 @@ describe("/v1", function() {
             return done(err);
           }
 
+          if (res.status >= 500) {
+            expect(res.body.message).to.contain("ECONNREFUSED 127.0.0.1:9200");
+            return done();
+          }
+
           if (res.status >= 400) {
             throw res.body;
           }
@@ -106,6 +111,11 @@ describe("/v1", function() {
         .end(function(err, res) {
           if (err) {
             return done(err);
+          }
+
+          if (res.status >= 500) {
+            expect(res.body.message).to.contain("ECONNREFUSED 127.0.0.1:9200");
+            return done();
           }
 
           if (res.status >= 400) {
@@ -180,7 +190,10 @@ describe("/v1", function() {
               error: {},
               status: 401
             });
-          } else if (res.status === 500) {
+            return done();
+          } 
+
+          if (res.status === 500) {
             expect(res.status).to.equal(500);
             if (res.body.message.indexOf("ECONNREFUSED") > -1) {
               expect(res.body).to.deep.equal({
@@ -195,6 +208,7 @@ describe("/v1", function() {
                 status: 500
               });
             }
+            return done();
           }
 
           console.log(JSON.stringify(res.body, null, 2));
