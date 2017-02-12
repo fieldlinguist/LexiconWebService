@@ -18,7 +18,7 @@ var router = express.Router();
 function querySearch(req, res, next) {
   debug("POST", req.params);
 
-  console.log(req.body);
+  debug("body", req.body);
   var dbname = req.params.dbname;
   var queryString = req.body.value;
   if (queryString && typeof queryString.trim === "function") {
