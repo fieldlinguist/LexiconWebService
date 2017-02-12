@@ -1,8 +1,10 @@
 "use strict";
 
+var config = require("config");
 var debug = require("debug")("routes:train");
 var express = require("express");
-var config = require("config");
+var url = require("url");
+
 var makeJSONRequest = require("../lib/request");
 
 var router = express.Router();
@@ -12,15 +14,20 @@ var router = express.Router();
  * @param  {Request} req
  * @param  {Response} res
  */
-function trainLexicon(req, res) {
+function trainLexicon(req, res, next) {
   debug("POST", req.params);
 
   var pouchname = req.params.pouchname;
-  var couchoptions = JSON.parse(JSON.stringify(config.corpusOptions));
-  couchoptions.path = "/" + pouchname + "/_design/deprecated/_view/get_datum_fields";
+  var couchoptions = url.parse(config.corpus.url);
+  couchoptions.path = "/" + pouchname + "/_design/lexicon/_view/lexiconNodes?group=true&limit=4";
   couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
 
-  makeJSONRequest(couchoptions, undefined, function(statusCode, result) {
+  makeJSONRequest(couchoptions, function(statusCode, result) {
+    debug("requested training data", result);
+    if (!result || result instanceof Error || !result.rows) {
+      return next(result);
+    }
+
     res.send(result);
   });
 }
