@@ -1,27 +1,8 @@
 module.exports = {
-  httpsOptions: {
-    key: "fielddb_debug.key",
-    cert: "fielddb_debug.crt",
-    port: "3185",
-    host: "localhost",
-    method: "GET"
+  corpus: {
+    url: process.env.FIELDDB_DATABASE_URL || "http://public:none@localhost:5984"
   },
-  corpusOptions: {
-    protocol: "http://",
-    host: "localhost",
-    defaultPort: "5984",
-    mehod: "GET",
-    path: "",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  },
-  searchOptions: {
-    protocol: "http://",
-    defaultPort: "3195",
-    host: "localhost",
-    path: "/default/datums/_search",
-    method: "POST",
-    headers: ""
+  search: {
+    url: process.env.FIELDDB_SEARCH_URL || "http://admin:none@localhost:9200"
   }
 };
