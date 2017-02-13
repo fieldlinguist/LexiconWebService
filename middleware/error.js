@@ -25,10 +25,6 @@ function errors(err, req, res, next) {
 
   data.status = err.status || err.statusCode || 500;
 
-  if (data.status === 500 && data.message === "Failed to obtain access token") {
-    data.status = 403;
-  }
-
   // support errors from elastic search
   if (!data.message && err.error) {
     data.message = err.error.reason;
@@ -40,11 +36,7 @@ function errors(err, req, res, next) {
   }
 
   res.status(data.status);
-  if (typeof res.json === "function") {
-    res.json(data);
-  } else if (typeof req.json === "function") {
-    req.json(data);
-  }
+  res.json(data);
 }
 
 module.exports = errors;

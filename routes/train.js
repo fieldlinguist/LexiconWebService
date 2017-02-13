@@ -3,9 +3,8 @@
 var config = require("config");
 var debug = require("debug")("routes:train");
 var express = require("express");
+var request = require("request");
 var url = require("url");
-
-var makeJSONRequest = require("../lib/request");
 
 var router = express.Router();
 
@@ -15,20 +14,32 @@ var router = express.Router();
  * @param  {Response} res
  */
 function trainLexicon(req, res, next) {
-  debug("POST", req.params);
+  debug("trainLexicon", req.params);
 
   var pouchname = req.params.pouchname;
-  var couchoptions = url.parse(config.corpus.url);
-  couchoptions.path = "/" + pouchname + "/_design/lexicon/_view/lexiconNodes?group=true&limit=4";
-  couchoptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
+  var couchDBOptions = url.parse(config.corpus.url);
+  couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
+  couchDBOptions.pathname = "/" + pouchname + "/_design/lexicon/_view/lexiconNodes";
+  couchDBOptions.query = {
+    group: true,
+    limit: 4
+  };
 
-  makeJSONRequest(couchoptions, function(statusCode, result) {
-    debug("requested training data", result);
-    if (!result || result instanceof Error || !result.rows) {
-      return next(result);
+  request({
+    uri: url.format(couchDBOptions),
+    method: "GET",
+    json: true
+  }, function(err, response, body) {
+    debug("requested training data", err, response.statusCode, body);
+    if (err) {
+      return next(err);
+    }
+    if (response.statusCode >= 400) {
+      body.status = response.statusCode;
+      return next(body);
     }
 
-    res.send(result);
+    res.json(body);
   });
 }
 

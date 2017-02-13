@@ -22,7 +22,7 @@ function useUqailaut(req, res) {
       var results = stdout.split("\n");
       results.pop();
 
-      res.send({
+      res.json({
         "output": results
       });
     }
@@ -92,7 +92,7 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
               farley: farley
             }, returnTier);
             debug("Sent results: \n" + JSON.stringify(output));
-            res.send(output);
+            res.json(output);
           }
 
         } else {
@@ -128,7 +128,7 @@ function analyzeInuktitutByTierByWord(req, res, returnTier) {
               farley: farley
             }, returnTier);
             debug("Sent results: \n" + JSON.stringify(output));
-            res.send(output);
+            res.json(output);
           }
         }
       }

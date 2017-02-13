@@ -76,7 +76,17 @@ describe("/v1", function() {
           }
 
           if (res.status >= 500) {
-            expect(res.body.message).to.contain("ECONNREFUSED 127.0.0.1:9200");
+            expect(res.body).to.deep.equal({
+              message: "connect ECONNREFUSED 127.0.0.1:9200",
+              error: {
+                address: "127.0.0.1",
+                code: "ECONNREFUSED",
+                errno: "ECONNREFUSED",
+                port: 9200,
+                syscall: "connect"
+              },
+              status: 500
+            });
             return done();
           }
 
@@ -114,7 +124,17 @@ describe("/v1", function() {
           }
 
           if (res.status >= 500) {
-            expect(res.body.message).to.contain("ECONNREFUSED 127.0.0.1:9200");
+            expect(res.body).to.deep.equal({
+              message: "connect ECONNREFUSED 127.0.0.1:9200",
+              error: {
+                address: "127.0.0.1",
+                code: "ECONNREFUSED",
+                errno: "ECONNREFUSED",
+                port: 9200,
+                syscall: "connect"
+              },
+              status: 500
+            });
             return done();
           }
 
@@ -173,7 +193,7 @@ describe("/v1", function() {
         .post("/search/testinglexicon-kartuli")
         .send({
           value: "orthography:არ OR translation:don't"
-          // value: "orthography:არ"
+            // value: "orthography:არ"
         })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
@@ -191,23 +211,31 @@ describe("/v1", function() {
               status: 401
             });
             return done();
-          } 
+          }
 
           if (res.status === 500) {
             expect(res.status).to.equal(500);
+
             if (res.body.message.indexOf("ECONNREFUSED") > -1) {
               expect(res.body).to.deep.equal({
                 message: "connect ECONNREFUSED 127.0.0.1:9200",
-                error: {},
+                error: {
+                  address: "127.0.0.1",
+                  code: "ECONNREFUSED",
+                  errno: "ECONNREFUSED",
+                  port: 9200,
+                  syscall: "connect"
+                },
                 status: 500
               });
-            } else {
-              expect(res.body).to.deep.equal({
-                message: "Unknown cluster.",
-                error: {},
-                status: 500
-              });
+              return done();
             }
+
+            expect(res.body).to.deep.equal({
+              message: "Unknown cluster.",
+              error: {},
+              status: 500
+            });
             return done();
           }
 

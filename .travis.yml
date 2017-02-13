@@ -3,6 +3,7 @@ node_js:
   - "4"
 
 before_install:
+  - export NODE_ENV=test
   - npm install jshint -g
 
 script:
