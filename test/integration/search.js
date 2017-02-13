@@ -231,8 +231,6 @@ describe("/v1", function() {
             return done(err);
           }
 
-          console.log(res.body);
-
           if (res.status === 401) {
             expect(res.status).to.equal(401);
             expect(res.body).to.deep.equal({
@@ -297,7 +295,7 @@ describe("/v1", function() {
           }
 
           console.log(JSON.stringify(res.body, null, 2));
-          expect(res.body.hits.total).to.not.equal(4);
+          expect(res.body.hits.total).to.equal(4);
           delete res.body.took;
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
