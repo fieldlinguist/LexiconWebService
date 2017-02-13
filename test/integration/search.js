@@ -91,7 +91,22 @@ describe("/v1", function() {
           }
 
           if (res.status >= 400) {
-            throw res.body;
+            expect(res.body).to.deep.equal({
+              message: "Failed to derive xcontent",
+              error: {
+                error: {
+                  root_cause: [{
+                    type: "parse_exception",
+                    reason: "Failed to derive xcontent"
+                  }],
+                  type: "parse_exception",
+                  reason: "Failed to derive xcontent"
+                },
+                status: 400
+              },
+              status: 400
+            });
+            return done();
           }
 
           console.log(JSON.stringify(res.body.couchDBResult, null, 2));
@@ -139,7 +154,22 @@ describe("/v1", function() {
           }
 
           if (res.status >= 400) {
-            throw res.body;
+            expect(res.body).to.deep.equal({
+              message: "Failed to derive xcontent",
+              error: {
+                error: {
+                  root_cause: [{
+                    type: "parse_exception",
+                    reason: "Failed to derive xcontent"
+                  }],
+                  type: "parse_exception",
+                  reason: "Failed to derive xcontent"
+                },
+                status: 400
+              },
+              status: 400
+            });
+            return done();
           }
 
           console.log(JSON.stringify(res.body.couchDBResult, null, 2));
@@ -235,6 +265,33 @@ describe("/v1", function() {
               message: "Unknown cluster.",
               error: {},
               status: 500
+            });
+            return done();
+          }
+
+          if (res.status >= 400) {
+            expect(res.body).to.deep.equal({
+              message: "no such index",
+              error: {
+                error: {
+                  root_cause: [{
+                    type: "index_not_found_exception",
+                    reason: "no such index",
+                    "resource.type": "index_or_alias",
+                    "resource.id": "testinglexicon-kartuli",
+                    index_uuid: "_na_",
+                    index: "testinglexicon-kartuli"
+                  }],
+                  type: "index_not_found_exception",
+                  reason: "no such index",
+                  "resource.type": "index_or_alias",
+                  "resource.id": "testinglexicon-kartuli",
+                  index_uuid: "_na_",
+                  index: "testinglexicon-kartuli"
+                },
+                status: 404
+              },
+              status: 404
             });
             return done();
           }
