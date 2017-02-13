@@ -39,7 +39,7 @@ function trainLexicon(req, res, next) {
       return next(body);
     }
 
-    res.send(body);
+    res.json(body);
   });
 }
 
