@@ -70,7 +70,7 @@ describe("/v1 error handling", function() {
       });
   });
 
-  it("should handle elasticsearch offline", function(done) {
+  it("should handle elasticsearch errors", function(done) {
     supertest(api)
       .post("/search/nockedcorpus")
       .send({
@@ -83,15 +83,27 @@ describe("/v1 error handling", function() {
         }
 
         expect(res.body).to.deep.equal({
-          message: "connect ECONNREFUSED 127.0.0.1:9200",
+          message: "no such index",
           error: {
-            address: "127.0.0.1",
-            code: "ECONNREFUSED",
-            errno: "ECONNREFUSED",
-            port: 9200,
-            syscall: "connect"
+            error: {
+              root_cause: [{
+                type: "index_not_found_exception",
+                reason: "no such index",
+                "resource.type": "index_or_alias",
+                "resource.id": "nockedcorpus",
+                index_uuid: "_na_",
+                index: "nockedcorpus"
+              }],
+              type: "index_not_found_exception",
+              reason: "no such index",
+              "resource.type": "index_or_alias",
+              "resource.id": "nockedcorpus",
+              index_uuid: "_na_",
+              index: "nockedcorpus"
+            },
+            status: 404
           },
-          status: 500
+          status: 404
         });
 
         done();

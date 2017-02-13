@@ -42,7 +42,8 @@ function querySearch(req, res, next) {
   var searchOptions = url.parse(config.search.url);
   searchOptions.pathname = "/" + dbname + "/datum/_search";
 
-  debug("POST ", searchOptions);
+  debug("searchOptions ", searchOptions, elasticsearchTemplateString);
+  debug("elasticsearchTemplateString ", elasticsearchTemplateString);
   request({
     data: elasticsearchTemplateString,
     json: true,
@@ -115,14 +116,14 @@ function indexDatabase(req, res, next) {
 
     // convert into 1 request per line
     data = data.map(JSON.stringify).join("\n") + "\n";
-    debug("re-indexing ", data);
+    debug("re-indexing with ", data);
 
     var searchOptions = url.parse(config.search.url);
     searchOptions.pathname = "/" + dbname + "/datum/_bulk";
 
-    debug("POST ", searchOptions);
+    debug("searchOptions ", searchOptions);
     request({
-      data: data,
+      body: data,
       json: true,
       method: "POST",
       uri: url.format(searchOptions)

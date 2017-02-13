@@ -29,6 +29,7 @@
     "test:coverage": "istanbul cover _mocha -- --recursive test",
     "test:unit": "mocha --recursive test/middleware test/routes",
     "test:integration": "mocha --recursive test/integration",
+    "test:nocked": "USE_NOCK=true mocha --recursive test/integration",
     "postinstall": "mkdir bin; cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
   },
   "dependencies": {
@@ -46,6 +47,7 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.0.2",
+    "nock": "^9.0.5",
     "sinon": "^1.17.5",
     "supertest": "^2.0.0"
   },

@@ -1,6 +1,8 @@
 "use strict";
 var config = require("config");
+var debug = require("debug")("test:integration:search");
 var expect = require("chai").expect;
+var nock = require("nock");
 var supertest = require("supertest");
 
 var api = require("../../");
@@ -9,6 +11,9 @@ var fixtures = {
     index: {
       kartuli: require("../fixtures/search/kartuli/index"),
       quechua: require("../fixtures/search/quechua/index")
+    },
+    createIndex: {
+      kartuli: require("../fixtures/search/kartuli/create-index")
     },
     properties: {
       kartuli: require("../fixtures/search/kartuli/properties")
@@ -42,7 +47,23 @@ fixtures.search.index.quechua.items.map(function(item) {
 delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.creation_date;
 delete fixtures.search.properties.kartuli["testinglexicon-kartuli"].settings.index.uuid;
 
+var useNocks = process.env.USE_NOCK;
+
 describe("/v1", function() {
+
+  before(function() {
+    if (useNocks) {
+      nock.disableNetConnect();
+      nock.enableNetConnect("127.0.0.1");
+    }
+  });
+
+  after(function() {
+    if (useNocks) {
+      nock.enableNetConnect();
+    }
+  });
+
   it("should use fixtures", function() {
     expect(fixtures.search).to.be.an("object");
     expect(fixtures.search.index).to.be.an("object");
@@ -67,12 +88,35 @@ describe("/v1", function() {
     it("should re-index a metadata heavy database", function(done) {
       this.timeout(10 * 1000);
 
+      var corpusNock;
+      var searchNock;
+      if (useNocks) {
+        corpusNock = nock(config.corpus.url)
+          .get("/testinglexicon-quechua/_design/search/_view/searchable")
+          .query({
+            limit: 4
+          })
+          .reply(200, fixtures.database.quechua);
+
+        searchNock = nock(config.search.url)
+          // .filteringRequestBody(/.*/, "*")
+          .post("/testinglexicon-quechua/datum/_bulk", function(body) {
+            debug("posted body was", body);
+            return true;
+          })
+          .reply(200, fixtures.search.index.quechua);
+      }
+
       supertest(api)
         .post("/search/testinglexicon-quechua/index")
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
           if (err) {
             return done(err);
+          }
+          if (useNocks) {
+            corpusNock.done();
+            searchNock.done();
           }
 
           if (res.status >= 500) {
@@ -91,13 +135,29 @@ describe("/v1", function() {
           }
 
           if (res.status >= 400) {
-            throw res.body;
+            expect(res.body).to.deep.equal({
+              message: "Failed to derive xcontent",
+              error: {
+                error: {
+                  root_cause: [{
+                    type: "parse_exception",
+                    reason: "Failed to derive xcontent"
+                  }],
+                  type: "parse_exception",
+                  reason: "Failed to derive xcontent"
+                },
+                status: 400
+              },
+              status: 400
+            });
+            return done();
           }
 
-          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
+          debug(JSON.stringify(res.body.couchDBResult, null, 2));
           expect(res.body.couchDBResult).to.deep.equal(fixtures.database.quechua);
 
           // could take 5 or 6 ms
+          debug(JSON.stringify(res.body.elasticSearchResult, null, 2));
           delete res.body.elasticSearchResult.took;
 
           res.body.elasticSearchResult.items.map(function(item) {
@@ -105,7 +165,7 @@ describe("/v1", function() {
             delete item.index.status; // status might be 201 created or 200 updated
             delete item.index._shards.successful; // successful will match the number of shards
           });
-          console.log(JSON.stringify(res.body.elasticSearchResult, null, 2));
+          debug(JSON.stringify(res.body.elasticSearchResult, null, 2));
           expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.quechua);
 
           done();
@@ -114,6 +174,24 @@ describe("/v1", function() {
 
     it("should re-index a media heavy database", function(done) {
       this.timeout(10 * 1000);
+      var corpusNock;
+      var searchNock;
+      if (useNocks) {
+        corpusNock = nock(config.corpus.url)
+          .get("/testinglexicon-kartuli/_design/search/_view/searchable")
+          .query({
+            limit: 4
+          })
+          .reply(200, fixtures.database.kartuli);
+
+        searchNock = nock(config.search.url)
+          // .filteringRequestBody(/.*/, "*")
+          .post("/testinglexicon-kartuli/datum/_bulk", function(body) {
+            debug("posted body was", body);
+            return true;
+          })
+          .reply(200, fixtures.search.index.kartuli);
+      }
 
       supertest(api)
         .post("/search/testinglexicon-kartuli/index")
@@ -121,6 +199,10 @@ describe("/v1", function() {
         .end(function(err, res) {
           if (err) {
             return done(err);
+          }
+          if (useNocks) {
+            corpusNock.done();
+            searchNock.done();
           }
 
           if (res.status >= 500) {
@@ -139,10 +221,25 @@ describe("/v1", function() {
           }
 
           if (res.status >= 400) {
-            throw res.body;
+            expect(res.body).to.deep.equal({
+              message: "Failed to derive xcontent",
+              error: {
+                error: {
+                  root_cause: [{
+                    type: "parse_exception",
+                    reason: "Failed to derive xcontent"
+                  }],
+                  type: "parse_exception",
+                  reason: "Failed to derive xcontent"
+                },
+                status: 400
+              },
+              status: 400
+            });
+            return done();
           }
 
-          console.log(JSON.stringify(res.body.couchDBResult, null, 2));
+          debug("res.body.couchDBResult", JSON.stringify(res.body.couchDBResult, null, 2));
           expect(res.body.couchDBResult).to.deep.equal(fixtures.database.kartuli);
 
           var elasticSearchResult = res.body.elasticSearchResult;
@@ -155,6 +252,12 @@ describe("/v1", function() {
             delete item.index._shards.successful; // successful will match the number of shards
           });
 
+          if (useNocks) {
+            searchNock = nock(config.search.url)
+              .get("/testinglexicon-kartuli")
+              .reply(200, fixtures.search.properties.kartuli);
+          }
+          
           // look at the index properties
           supertest(config.search.url)
             .get("/testinglexicon-kartuli")
@@ -162,8 +265,11 @@ describe("/v1", function() {
               if (err) {
                 return done(err);
               }
+              if (useNocks) {
+                searchNock.done();
+              }
 
-              console.log(JSON.stringify(res.body, null, 2));
+              debug(JSON.stringify(res.body, null, 2));
               delete res.body["testinglexicon-kartuli"].settings.index.creation_date;
               delete res.body["testinglexicon-kartuli"].settings.index.uuid;
               if (res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas) {
@@ -176,7 +282,7 @@ describe("/v1", function() {
               }
               expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
 
-              console.log(JSON.stringify(elasticSearchResult, null, 2));
+              debug(JSON.stringify(elasticSearchResult, null, 2));
               expect(elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
               done();
@@ -188,6 +294,12 @@ describe("/v1", function() {
   describe("search", function() {
     it("should search a database", function(done) {
       this.timeout(10 * 1000);
+      var searchNock;
+      if (useNocks) {
+        searchNock = nock(config.search.url)
+          .post("/testinglexicon-kartuli/datum/_search")
+          .reply(200, fixtures.search.query.kartuli);
+      }
 
       supertest(api)
         .post("/search/testinglexicon-kartuli")
@@ -200,8 +312,9 @@ describe("/v1", function() {
           if (err) {
             return done(err);
           }
-
-          console.log(res.body);
+          if (useNocks) {
+            searchNock.done();
+          }
 
           if (res.status === 401) {
             expect(res.status).to.equal(401);
@@ -239,8 +352,35 @@ describe("/v1", function() {
             return done();
           }
 
-          console.log(JSON.stringify(res.body, null, 2));
-          expect(res.body.hits.total).to.not.equal(4);
+          if (res.status >= 400) {
+            expect(res.body).to.deep.equal({
+              message: "no such index",
+              error: {
+                error: {
+                  root_cause: [{
+                    type: "index_not_found_exception",
+                    reason: "no such index",
+                    "resource.type": "index_or_alias",
+                    "resource.id": "testinglexicon-kartuli",
+                    index_uuid: "_na_",
+                    index: "testinglexicon-kartuli"
+                  }],
+                  type: "index_not_found_exception",
+                  reason: "no such index",
+                  "resource.type": "index_or_alias",
+                  "resource.id": "testinglexicon-kartuli",
+                  index_uuid: "_na_",
+                  index: "testinglexicon-kartuli"
+                },
+                status: 404
+              },
+              status: 404
+            });
+            return done();
+          }
+
+          debug(JSON.stringify(res.body, null, 2));
+          expect(res.body.hits.total).to.equal(4);
           delete res.body.took;
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
