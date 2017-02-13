@@ -3,10 +3,10 @@
 var config = require("config");
 var debug = require("debug")("routes:search");
 var express = require("express");
+var request = require("request");
 var url = require("url");
 
 var search = require("../lib/search");
-var makeJSONRequest = require("../lib/request");
 
 var router = express.Router();
 
@@ -16,7 +16,7 @@ var router = express.Router();
  * @param  {Response} res
  */
 function querySearch(req, res, next) {
-  debug("POST", req.params);
+  debug("querySearch", req.params);
 
   debug("body", req.body);
   var dbname = req.params.dbname;
@@ -40,19 +40,27 @@ function querySearch(req, res, next) {
   debug(elasticsearchTemplateString);
 
   var searchOptions = url.parse(config.search.url);
-  searchOptions.method = "POST";
-  searchOptions.data = elasticsearchTemplateString;
-  searchOptions.path = "/" + dbname + "/datum/_search";
+  searchOptions.pathname = "/" + dbname + "/datum/_search";
 
-  makeJSONRequest(searchOptions, function(status, result) {
-    debug("requested search result", result);
-    if (status >= 400 || !result || result instanceof Error) {
-      return next(result);
+  debug("POST ", searchOptions);
+  request({
+    data: elasticsearchTemplateString,
+    json: true,
+    method: "POST",
+    uri: url.format(searchOptions)
+  }, function(err, response, body) {
+    debug("requested search result", err, body);
+    if (err) {
+      return next(err);
+    }
+    if (response.statusCode >= 400) {
+      body.status = response.statusCode;
+      return next(body);
     }
 
-    res.status(status);
-    result.original = elasticsearchTemplateString;
-    res.json(result);
+    res.status(response.statusCode);
+    body.original = elasticsearchTemplateString;
+    res.json(body);
   });
 }
 
@@ -65,17 +73,29 @@ function querySearch(req, res, next) {
  * @param  {Function} next
  */
 function indexDatabase(req, res, next) {
-  debug("POST", req.params);
+  debug("indexDatabase", req.params);
 
   var dbname = req.params.dbname;
   debug("Config", config, process.env);
   var couchDBOptions = url.parse(config.corpus.url);
-  couchDBOptions.path = "/" + dbname + "/_design/search/_view/searchable?limit=4";
   couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
+  couchDBOptions.pathname = "/" + dbname + "/_design/search/_view/searchable";
+  couchDBOptions.query = {
+    limit: 4
+  };
 
-  makeJSONRequest(couchDBOptions, function(status, couchDBResult) {
+  debug("GET ", couchDBOptions);
+  request({
+    json: true,
+    method: "GET",
+    uri: url.format(couchDBOptions)
+  }, function(err, response, couchDBResult) {
     debug("requested training data", couchDBResult);
-    if (status >= 400 || !couchDBResult || couchDBResult instanceof Error || !couchDBResult.rows || couchDBResult.reason) {
+    if (err || couchDBResult.reason) {
+      return next(err || couchDBResult);
+    }
+    if (response.statusCode >= 400) {
+      couchDBResult.status = response.statusCode;
       return next(couchDBResult);
     }
 
@@ -98,17 +118,25 @@ function indexDatabase(req, res, next) {
     debug("re-indexing ", data);
 
     var searchOptions = url.parse(config.search.url);
-    searchOptions.method = "POST";
-    searchOptions.data = data;
-    searchOptions.path = "/" + dbname + "/datum/_bulk";
+    searchOptions.pathname = "/" + dbname + "/datum/_bulk";
 
-    makeJSONRequest(searchOptions, function(status, elasticSearchResult) {
-      debug("index search elasticSearchResult", elasticSearchResult);
-      if (status >= 400 || !elasticSearchResult || elasticSearchResult instanceof Error) {
+    debug("POST ", searchOptions);
+    request({
+      data: data,
+      json: true,
+      method: "POST",
+      uri: url.format(searchOptions)
+    }, function(err, response, elasticSearchResult) {
+      debug("index search elasticSearchResult", err, elasticSearchResult);
+      if (err) {
+        return next(err);
+      }
+      if (response.statusCode >= 400) {
+        elasticSearchResult.status = response.statusCode;
         return next(elasticSearchResult);
       }
 
-      res.status(status);
+      res.status(response.statusCode);
       res.json({
         couchDBResult: couchDBResult,
         elasticSearchResult: elasticSearchResult

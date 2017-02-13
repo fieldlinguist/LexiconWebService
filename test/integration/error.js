@@ -37,9 +37,10 @@ describe("/v1 error handling", function() {
           message: "no_db_file",
           error: {
             error: "not_found",
-            reason: "no_db_file"
+            reason: "no_db_file",
+            status: 404
           },
-          status: 500
+          status: 404
         });
 
         done();
@@ -59,9 +60,10 @@ describe("/v1 error handling", function() {
           message: "You are not authorized to access this db.",
           error: {
             error: "unauthorized",
-            reason: "You are not authorized to access this db."
+            reason: "You are not authorized to access this db.",
+            status: 401
           },
-          status: 500
+          status: 401
         });
 
         done();
