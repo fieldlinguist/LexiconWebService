@@ -26,7 +26,7 @@
     "fielddb-lexicon": "./bin/lexicon-web-service"
   },
   "scripts": {
-    "start": "node bin/lexicon-web-service",
+    "start": "NODE_ENV=local node bin/lexicon-web-service",
     "lint": "jshint config middleware routes test",
     "test": "NODE_ENV=test mocha --recursive test",
     "test:coverage": "istanbul cover _mocha -- --recursive test",
@@ -34,7 +34,7 @@
     "test:integration": "NODE_ENV=test mocha --recursive test/integration",
     "test:nocked": "NODE_ENV=test USE_NOCK=true mocha --recursive test/integration",
     "postinstall": "cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar",
-    "watch": "nodemon bin/lexicon-web-service"
+    "watch": "NODE_ENV=local nodemon bin/lexicon-web-service"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
