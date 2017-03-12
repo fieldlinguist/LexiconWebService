@@ -96,6 +96,9 @@ function indexDatabase(req, res, next) {
       return next(err);
     }
     if (response.statusCode >= 400) {
+      if (couchDBResult.reason === "missing") {
+        couchDBResult.reason = "Missing search map reduce";
+      }
       couchDBResult.status = response.statusCode;
       return next(couchDBResult);
     }
