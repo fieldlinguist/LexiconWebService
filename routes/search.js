@@ -92,8 +92,8 @@ function indexDatabase(req, res, next) {
     uri: url.format(couchDBOptions)
   }, function(err, response, couchDBResult) {
     debug("requested training data", couchDBResult);
-    if (err || couchDBResult.reason) {
-      return next(err || couchDBResult);
+    if (err) {
+      return next(err);
     }
     if (response.statusCode >= 400) {
       couchDBResult.status = response.statusCode;
