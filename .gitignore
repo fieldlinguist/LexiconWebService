@@ -4,7 +4,9 @@ compiled_handlebars.js
 *.handlebars.js
 
 #ignore private config files
-*_production*
+*production*
+config/production.js
+config/production.json
 config/local.js
 config/local.json
 
