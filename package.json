@@ -1,6 +1,6 @@
 {
   "name": "lexicon-elasticsearch",
-  "version": "4.42.12",
+  "version": "4.5.30",
   "description": "a lexicon web service with analyzers for a few languages and an elasticsearch wrapper",
   "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
   "repository": {
@@ -25,12 +25,12 @@
   "scripts": {
     "start": "node bin/www",
     "lint": "jshint config middleware routes test",
-    "test": "mocha --recursive test",
+    "test": "NODE_ENV=test mocha --recursive test",
     "test:coverage": "istanbul cover _mocha -- --recursive test",
-    "test:unit": "mocha --recursive test/middleware test/routes",
-    "test:integration": "mocha --recursive test/integration",
-    "test:nocked": "USE_NOCK=true mocha --recursive test/integration",
-    "postinstall": "mkdir bin; cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
+    "test:unit": "NODE_ENV=test mocha --recursive test/middleware test/routes",
+    "test:integration": "NODE_ENV=test mocha --recursive test/integration",
+    "test:nocked": "NODE_ENV=test USE_NOCK=true mocha --recursive test/integration",
+    "postinstall": "cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
