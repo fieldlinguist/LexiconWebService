@@ -8,7 +8,7 @@ describe("User Interface", function() {
   it("should load the lexicon browser", function(done) {
     supertest(api)
       .get("/")
-      .expect("Content-Type", "text/html; charset=UTF-8")
+      .expect("Content-Type", /text\/html; charset=UTF-8/i)
       .expect(200)
       .end(function(err, res) {
         if (err) {
