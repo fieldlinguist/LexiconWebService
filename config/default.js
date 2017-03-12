@@ -5,7 +5,8 @@ var config = {
     url: "http://public:none@localhost:5984"
   },
   search: {
-    url: "http://admin:none@localhost:9200"
+    url: "http://admin:none@localhost:9200",
+    DEFAULT_MAX_INDEX_LIMIT: 20000,
   },
   url: "https://localhost:3185",
   ssl: {
