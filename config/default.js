@@ -2,7 +2,8 @@ var fs = require("fs");
 
 var config = {
   corpus: {
-    url: "http://public:none@localhost:5984"
+    url: "http://public:none@localhost:5984",
+    DEFAULT_MAX_INDEX_LIMIT: 20000,
   },
   search: {
     url: "http://admin:none@localhost:9200",
