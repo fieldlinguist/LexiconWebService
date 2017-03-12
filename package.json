@@ -33,7 +33,7 @@
     "test:unit": "NODE_ENV=test mocha --recursive test/middleware test/routes",
     "test:integration": "NODE_ENV=test mocha --recursive test/integration",
     "test:nocked": "NODE_ENV=test USE_NOCK=true mocha --recursive test/integration",
-    "postinstall": "cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar",
+    "postinstall": "bower install && cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar ",
     "watch": "NODE_ENV=local nodemon bin/lexicon-web-service"
   },
   "dependencies": {
