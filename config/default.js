@@ -13,3 +13,6 @@ var config = {
     cert: fs.readFileSync(__dirname + "/fielddb_debug.crt", "utf8")
   }
 };
+
+console.log("Loaded default config");
+module.exports = config;
