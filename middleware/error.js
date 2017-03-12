@@ -8,6 +8,7 @@ function errors(err, req, res, next) {
   var data;
 
   debug("in the error handler " + process.env.NODE_ENV, err, err.stack);
+  console.log(err);
 
   if (["development", "test", "local"].indexOf(process.env.NODE_ENV) > -1) {
     // expose stack traces
