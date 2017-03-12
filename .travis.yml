@@ -8,4 +8,4 @@ before_install:
 
 script:
   - npm run lint
-  - FIELDDB_DATABASE_URL="https://public:none@corpusdev.lingsync.org" npm run test:coverage
+  - npm run test:coverage

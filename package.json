@@ -29,7 +29,7 @@
     "start": "NODE_ENV=local node bin/lexicon-web-service",
     "lint": "jshint config middleware routes test",
     "test": "NODE_ENV=test mocha --recursive test",
-    "test:coverage": "istanbul cover _mocha -- --recursive test",
+    "test:coverage": "NODE_ENV=test istanbul cover _mocha -- --recursive test",
     "test:unit": "NODE_ENV=test mocha --recursive test/middleware test/routes",
     "test:integration": "NODE_ENV=test mocha --recursive test/integration",
     "test:nocked": "NODE_ENV=test USE_NOCK=true mocha --recursive test/integration",
