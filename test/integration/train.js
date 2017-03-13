@@ -11,6 +11,9 @@ describe("/v1", function() {
 
       supertest(api)
         .post("/train/lexicon/testinglexicon-kartuli")
+        .query({
+          limit: 4
+        })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
           if (err) {

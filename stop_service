@@ -1,5 +1,5 @@
 #!/bin/bash
 
-forever stop ./bin/www
+forever stop ./bin/lexicon-web-service
 
 cd $FIELDDB_HOME/LexiconWebService

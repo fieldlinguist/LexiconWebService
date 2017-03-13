@@ -65,6 +65,39 @@ function querySearch(req, res, next) {
   });
 }
 
+/*
+* Can set the analyzer on the index
+* https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
+*/
+function declareAnalyzer(req, res, next) {
+  var dbname = req.params.dbname;
+  var languageName = req.query.languageName;
+  var maxTokenLength = req.query.maxTokenLength;
+  request({
+    body: {
+      "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "analysis": {
+          "analyzer": {
+            "my_unicode_analyzer": {
+              "type": "standard",
+              "max_token_length": maxTokenLength || 5,
+              "stopwords": languageName || "_english_"
+            }
+          }
+        }
+      }
+    },
+    json: true,
+    method: "PUT",
+    uri: url.format(config.search.url + "/" + dbname + "/datum")
+  }, function(err, response, elasticSearchResult) {
+    debug("Set the analalyzer");
+    next(elasticSearchResult);
+  });
+}
+
 /**
  * Re-index a database
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
@@ -77,12 +110,13 @@ function indexDatabase(req, res, next) {
   debug("indexDatabase", req.params);
 
   var dbname = req.params.dbname;
+  var limit = req.query.limit || config.search.DEFAULT_MAX_INDEX_LIMIT;
+  limit = Math.min(limit, config.search.DEFAULT_MAX_INDEX_LIMIT);
+
   debug("Config", config, process.env);
-  var couchDBOptions = url.parse(config.corpus.url);
-  couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
-  couchDBOptions.pathname = "/" + dbname + "/_design/search/_view/searchable";
+  var couchDBOptions = url.parse(config.corpus.url + "/" + dbname + "/_design/search/_view/searchable");
   couchDBOptions.query = {
-    limit: 4
+    limit: limit
   };
 
   debug("GET ", couchDBOptions);
@@ -92,10 +126,13 @@ function indexDatabase(req, res, next) {
     uri: url.format(couchDBOptions)
   }, function(err, response, couchDBResult) {
     debug("requested training data", couchDBResult);
-    if (err || couchDBResult.reason) {
-      return next(err || couchDBResult);
+    if (err) {
+      return next(err);
     }
     if (response.statusCode >= 400) {
+      if (couchDBResult.reason === "missing") {
+        couchDBResult.reason = "Missing search map reduce";
+      }
       couchDBResult.status = response.statusCode;
       return next(couchDBResult);
     }
@@ -111,26 +148,28 @@ function indexDatabase(req, res, next) {
           "_index": dbname
         }
       });
+
       data.push(searchable);
     });
-
-    // convert into 1 request per line
+    // convert into 1 request per line (non-json)
     data = data.map(JSON.stringify).join("\n") + "\n";
-    debug("re-indexing with ", data);
+    debug("(re-)indexing with \n\n", data);
+    debug("\n\n");
 
-    var searchOptions = url.parse(config.search.url);
-    searchOptions.pathname = "/" + dbname + "/datum/_bulk";
-
-    debug("searchOptions ", searchOptions);
     request({
       body: data,
-      json: true,
+      // json: true,
       method: "POST",
-      uri: url.format(searchOptions)
+      uri: url.format(config.search.url + "/" + dbname + "/datum/_bulk")
     }, function(err, response, elasticSearchResult) {
       debug("index search elasticSearchResult", err, elasticSearchResult);
       if (err) {
         return next(err);
+      }
+      try {
+        elasticSearchResult = JSON.parse(elasticSearchResult);
+      } catch (parseError) {
+        return next(parseError);
       }
       if (response.statusCode >= 400) {
         elasticSearchResult.status = response.statusCode;
@@ -151,5 +190,6 @@ router.post("/:dbname", querySearch);
 
 module.exports.querySearch = querySearch;
 module.exports.indexDatabase = indexDatabase;
+module.exports.declareAnalyzer = declareAnalyzer;
 
 module.exports.router = router;

@@ -85,7 +85,20 @@ describe("/v1", function() {
   });
 
   describe("indexing", function() {
-    it("should re-index a metadata heavy database", function(done) {
+    it("should have a template", function(done) {
+      supertest(config.search.url)
+        .get("/_template")
+        .expect("Content-Type", "application/json; charset=UTF-8")
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.body).to.deep.equal({});
+          done();
+        });
+    });
+
+    it("should (re-)index a metadata heavy database", function(done) {
       this.timeout(10 * 1000);
 
       var corpusNock;
@@ -109,6 +122,9 @@ describe("/v1", function() {
 
       supertest(api)
         .post("/search/testinglexicon-quechua/index")
+        .query({
+          limit: 4
+        })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
           if (err) {
@@ -120,36 +136,14 @@ describe("/v1", function() {
           }
 
           if (res.status >= 500) {
-            expect(res.body).to.deep.equal({
-              message: "connect ECONNREFUSED 127.0.0.1:9200",
-              error: {
-                address: "127.0.0.1",
-                code: "ECONNREFUSED",
-                errno: "ECONNREFUSED",
-                port: 9200,
-                syscall: "connect"
-              },
-              status: 500
-            });
+            expect(res.body.message).to.not.equal("connect ECONNREFUSED 127.0.0.1:9200");
+            expect(res.body).to.deep.equal({});
             return done();
           }
 
           if (res.status >= 400) {
-            expect(res.body).to.deep.equal({
-              message: "Failed to derive xcontent",
-              error: {
-                error: {
-                  root_cause: [{
-                    type: "parse_exception",
-                    reason: "Failed to derive xcontent"
-                  }],
-                  type: "parse_exception",
-                  reason: "Failed to derive xcontent"
-                },
-                status: 400
-              },
-              status: 400
-            });
+            expect(res.body.message).to.not.equal("Failed to derive xcontent");
+            expect(res.body).to.deep.equal({});
             return done();
           }
 
@@ -161,18 +155,20 @@ describe("/v1", function() {
           delete res.body.elasticSearchResult.took;
 
           res.body.elasticSearchResult.items.map(function(item) {
+            delete item.index.created; // maybe true or false
+            delete item.index.result; // maybe created or updated
             delete item.index._version; // version will increase on each request
             delete item.index.status; // status might be 201 created or 200 updated
             delete item.index._shards.successful; // successful will match the number of shards
           });
-          debug(JSON.stringify(res.body.elasticSearchResult, null, 2));
+          // debug(JSON.stringify(res.body.elasticSearchResult, null, 2));
           expect(res.body.elasticSearchResult).to.deep.equal(fixtures.search.index.quechua);
 
           done();
         });
     });
 
-    it("should re-index a media heavy database", function(done) {
+    it("should (re-)index a media heavy database", function(done) {
       this.timeout(10 * 1000);
       var corpusNock;
       var searchNock;
@@ -195,6 +191,9 @@ describe("/v1", function() {
 
       supertest(api)
         .post("/search/testinglexicon-kartuli/index")
+        .query({
+          limit: 4
+        })
         .expect("Content-Type", "application/json; charset=utf-8")
         .end(function(err, res) {
           if (err) {
@@ -206,36 +205,14 @@ describe("/v1", function() {
           }
 
           if (res.status >= 500) {
-            expect(res.body).to.deep.equal({
-              message: "connect ECONNREFUSED 127.0.0.1:9200",
-              error: {
-                address: "127.0.0.1",
-                code: "ECONNREFUSED",
-                errno: "ECONNREFUSED",
-                port: 9200,
-                syscall: "connect"
-              },
-              status: 500
-            });
+            expect(res.body.message).to.not.equal("connect ECONNREFUSED 127.0.0.1:9200");
+            expect(res.body).to.deep.equal({});
             return done();
           }
 
           if (res.status >= 400) {
-            expect(res.body).to.deep.equal({
-              message: "Failed to derive xcontent",
-              error: {
-                error: {
-                  root_cause: [{
-                    type: "parse_exception",
-                    reason: "Failed to derive xcontent"
-                  }],
-                  type: "parse_exception",
-                  reason: "Failed to derive xcontent"
-                },
-                status: 400
-              },
-              status: 400
-            });
+            expect(res.body.message).to.not.equal("Failed to derive xcontent");
+            expect(res.body).to.deep.equal({});
             return done();
           }
 
@@ -247,10 +224,15 @@ describe("/v1", function() {
           delete elasticSearchResult.took;
 
           elasticSearchResult.items.map(function(item) {
+            delete item.index.result;
+            delete item.index.created;
             delete item.index._version; // version will increase on each request
             delete item.index.status; // status might be 201 created or 200 updated
             delete item.index._shards.successful; // successful will match the number of shards
           });
+
+          debug(JSON.stringify(elasticSearchResult, null, 2));
+          expect(elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
           if (useNocks) {
             searchNock = nock(config.search.url)
@@ -281,9 +263,6 @@ describe("/v1", function() {
                 delete res.body["testinglexicon-kartuli"].settings.index.numberOfShards;
               }
               expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
-
-              debug(JSON.stringify(elasticSearchResult, null, 2));
-              expect(elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
 
               done();
             });

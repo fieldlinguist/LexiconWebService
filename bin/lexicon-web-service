@@ -4,7 +4,7 @@ var url = require("url");
 var https = require("https");
 
 var service = require("../lexicon-service");
-var config = require("../config");
+var config = require("config");
 
 var url = url.parse(config.url);
 
@@ -18,3 +18,5 @@ if (process.env.NODE_ENV === "production") {
     console.log("HTTPS Express server listening on https://localhost:" + server.address().port);
   });
 }
+
+module.exports = service;

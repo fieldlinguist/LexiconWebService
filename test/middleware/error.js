@@ -5,6 +5,8 @@ var sinon = require("sinon");
 
 var error = require("./../../middleware/error");
 
+var ORIGINAL_NODE_ENV = process.env.NODE_ENV;
+
 describe("error middleware", function() {
   var err = new Error("oops");
   err.status = 500;
@@ -15,6 +17,10 @@ describe("error middleware", function() {
     }
   };
   var res = {};
+
+  it("should usually run with NODE_ENV=test", function() {
+    expect(process.env.NODE_ENV).to.equal("test");
+  });
 
   it("should load", function() {
     expect(error).to.be.a("function");
@@ -28,6 +34,10 @@ describe("error middleware", function() {
     });
 
     describe("in development", function() {
+      after(function() {
+        process.env.NODE_ENV = ORIGINAL_NODE_ENV;
+      });
+      
       beforeEach(function() {
         process.env.NODE_ENV = "development";
       });
@@ -46,6 +56,10 @@ describe("error middleware", function() {
     });
 
     describe("in production", function() {
+      after(function() {
+        process.env.NODE_ENV = ORIGINAL_NODE_ENV;
+      });
+
       beforeEach(function() {
         process.env.NODE_ENV = "production";
       });

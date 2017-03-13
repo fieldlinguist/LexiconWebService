@@ -1,0 +1,27 @@
+{
+  "name": "lexicon-elasticsearch",
+  "description": "a lexicon web service with analyzers for a few languages and an elasticsearch wrapper",
+  "authors": [
+    "cesine <cesine@yahoo.com>",
+    "Emmy Cathcart <maryellencathcart@gmail.com>",
+    "Josh Horner <josh.horner@gmail.com>"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "fielddb",
+    "lexicon",
+    "farley",
+    "inuktitut"
+  ],
+  "homepage": "https://github.com/fielddb/LexiconWebService",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fielddb-glosser": "^3.12.15"
+  }
+}

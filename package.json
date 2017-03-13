@@ -1,6 +1,6 @@
 {
   "name": "lexicon-elasticsearch",
-  "version": "4.42.12",
+  "version": "4.46.12",
   "description": "a lexicon web service with analyzers for a few languages and an elasticsearch wrapper",
   "homepage": "https://github.com/FieldDB/FieldDB/issues/milestones?state=closed",
   "repository": {
@@ -22,15 +22,19 @@
     "Josh Horner <josh.horner@gmail.com>"
   ],
   "main": "lexicon-service.js",
+  "bin": {
+    "fielddb-lexicon": "./bin/lexicon-web-service"
+  },
   "scripts": {
-    "start": "node bin/www",
+    "start": "NODE_ENV=local node bin/lexicon-web-service",
     "lint": "jshint config middleware routes test",
-    "test": "mocha --recursive test",
-    "test:coverage": "istanbul cover _mocha -- --recursive test",
-    "test:unit": "mocha --recursive test/middleware test/routes",
-    "test:integration": "mocha --recursive test/integration",
-    "test:nocked": "USE_NOCK=true mocha --recursive test/integration",
-    "postinstall": "mkdir bin; cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar"
+    "test": "NODE_ENV=test mocha --recursive test",
+    "test:coverage": "NODE_ENV=test istanbul cover _mocha -- --recursive test",
+    "test:unit": "NODE_ENV=test mocha --recursive test/middleware test/routes",
+    "test:integration": "NODE_ENV=test mocha --recursive test/integration",
+    "test:nocked": "NODE_ENV=test USE_NOCK=true mocha --recursive test/integration",
+    "postinstall": "bower install && cd bin; ls Uqailaut.jar || wget https://github.com/nrc-cnrc/InuktitutToolkit/blob/master/Inuktitut-Java/Uqailaut/Uqailaut.jar?raw=true -O Uqailaut.jar ",
+    "watch": "NODE_ENV=local nodemon bin/lexicon-web-service"
   },
   "dependencies": {
     "body-parser": "^1.15.2",

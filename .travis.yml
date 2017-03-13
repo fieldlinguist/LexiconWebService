@@ -5,7 +5,8 @@ node_js:
 before_install:
   - export NODE_ENV=test
   - npm install jshint -g
+  - npm install bower -g
 
 script:
   - npm run lint
-  - FIELDDB_DATABASE_URL="https://public:none@corpusdev.lingsync.org" npm run test:coverage
+  - npm run test:coverage

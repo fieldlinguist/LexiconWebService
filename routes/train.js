@@ -17,12 +17,13 @@ function trainLexicon(req, res, next) {
   debug("trainLexicon", req.params);
 
   var pouchname = req.params.pouchname;
-  var couchDBOptions = url.parse(config.corpus.url);
-  couchDBOptions.auth = "public:none"; // Not indexing non-public data couch_keys.username + ":" + couch_keys.password;
-  couchDBOptions.pathname = "/" + pouchname + "/_design/lexicon/_view/lexiconNodes";
+  var limit = req.query.limit || config.corpus.DEFAULT_MAX_INDEX_LIMIT;
+  limit = Math.min(limit, config.corpus.DEFAULT_MAX_INDEX_LIMIT);
+
+  var couchDBOptions = url.parse(config.corpus.url + "/" + pouchname + "/_design/lexicon/_view/lexiconNodes");
   couchDBOptions.query = {
     group: true,
-    limit: 4
+    limit: limit
   };
 
   request({

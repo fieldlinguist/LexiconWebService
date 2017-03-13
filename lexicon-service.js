@@ -36,7 +36,10 @@ service.use(cors());
  * Routes
  */
 service.use(favicon(__dirname + "/public/favicon.ico"));
-service.use(express.static(__dirname + '/../FieldDBGlosser/samples/vanilla'));
+service.use(express.static(__dirname + '/bower_components/fielddb-glosser/samples/vanilla'));
+service.use(express.static(__dirname + '/bower_components/fielddb-glosser'));
+// TODO switch to lexicon browser
+// service.use(express.static(__dirname + '/bower_components/fielddb-glosser/samples/vanilla'));
 service.use('/search', searchRoutes);
 service.use('/train', trainRoutes);
 service.use('/', inuktitutRoutes);
