@@ -76,6 +76,8 @@ function declareAnalyzer(req, res, next) {
   request({
     body: {
       "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
         "analysis": {
           "analyzer": {
             "my_unicode_analyzer": {
@@ -146,6 +148,7 @@ function indexDatabase(req, res, next) {
           "_index": dbname
         }
       });
+
       data.push(searchable);
     });
     // convert into 1 request per line (non-json)
