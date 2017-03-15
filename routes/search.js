@@ -66,9 +66,9 @@ function querySearch(req, res, next) {
 }
 
 /*
-* Can set the analyzer on the index
-* https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
-*/
+ * Can set the analyzer on the index
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
+ */
 function declareAnalyzer(req, res, next) {
   var dbname = req.params.dbname;
   var languageName = req.query.languageName;
