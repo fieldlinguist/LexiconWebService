@@ -85,6 +85,13 @@ describe("/v1", function() {
   });
 
   describe("indexing", function() {
+    before(function() {
+      if (process.env.TRAVIS_PULL_REQUEST) {
+        return this.skip();
+      }
+      expect(config.search.url).to.not.equal(undefined);
+    });
+
     it("should have a template", function(done) {
       supertest(config.search.url)
         .get("/_template")
@@ -271,6 +278,13 @@ describe("/v1", function() {
   });
 
   describe("search", function() {
+    before(function() {
+      if (process.env.TRAVIS_PULL_REQUEST) {
+        return this.skip();
+      }
+      expect(config.search.url).to.not.equal(undefined);
+    });
+    
     it("should search a database", function(done) {
       this.timeout(10 * 1000);
       var searchNock;
