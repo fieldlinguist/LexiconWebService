@@ -3,6 +3,6 @@ module.exports = {
     url: "https://public:none@corpusdev.lingsync.org"
   },
   search: {
-    url: "https://searchdev.lingsync.org"
+    url: "https://${process.env.SEARCH_AUTH}.searchdev.lingsync.org"
   }
 };

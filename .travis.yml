@@ -1,12 +1,15 @@
 language: node_js
 node_js:
-  - "4"
+- '4'
 
 before_install:
-  - export NODE_ENV=test
-  - npm install jshint -g
-  - npm install bower -g
+- export NODE_ENV=test
+- npm install jshint -g
+- npm install bower -g
 
 script:
-  - npm run lint
-  - npm run test:coverage
+- npm run lint
+- npm run test:coverage
+env:
+  matrix:
+    secure: MDPqGOYG34lUb+HbRv9zW9ECEIraWicb0byPLQ4t/ICcYbvIaZr6KmTo+0rP0tvZNjFTqxQefogy3ir0w5Tx07FhviMtkMtaXhZ9qqWvNvTgLl7sG5EwwtCavslLMGoBXgp9jciuX4YHhWkVcqtIt5WxBVGmMBDJFKetGrJ1JME=
