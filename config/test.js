@@ -7,3 +7,8 @@ module.exports = {
   }
 };
 console.log("Loaded test config");
+
+// Normalize the env var to be falsy
+if (process.env.TRAVIS_PULL_REQUEST === "false") {
+  delete process.env.TRAVIS_PULL_REQUEST;
+}
