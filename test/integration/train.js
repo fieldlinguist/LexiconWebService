@@ -8,7 +8,7 @@ var api = require("../../");
 describe("/v1", function() {
   describe("train", function() {
     before(function() {
-      if (process.env.TRAVIS_PULL_REQUEST) {
+      if (process.env.TRAVIS_PULL_REQUEST && !config.corpus.url) {
         return this.skip();
       }
       expect(config.corpus.url).to.not.equal(undefined);

@@ -86,7 +86,7 @@ describe("/v1", function() {
 
   describe("indexing", function() {
     before(function() {
-      if (process.env.TRAVIS_PULL_REQUEST) {
+      if (process.env.TRAVIS_PULL_REQUEST && !config.search.url) {
         return this.skip();
       }
       expect(config.search.url).to.not.equal(undefined);
@@ -279,7 +279,7 @@ describe("/v1", function() {
 
   describe("search", function() {
     before(function() {
-      if (process.env.TRAVIS_PULL_REQUEST) {
+      if (process.env.TRAVIS_PULL_REQUEST && !config.search.url) {
         return this.skip();
       }
       expect(config.search.url).to.not.equal(undefined);

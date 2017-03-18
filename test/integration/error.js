@@ -1,4 +1,5 @@
 "use strict";
+var config = require("config");
 var expect = require("chai").expect;
 var supertest = require("supertest");
 var api = require("../../");
@@ -25,7 +26,7 @@ describe("/v1 error handling", function() {
   });
 
   it("should handle corpus not found", function(done) {
-    if (process.env.TRAVIS_PULL_REQUEST) {
+    if (process.env.TRAVIS_PULL_REQUEST && !config.corpus.url) {
       return this.skip();
     }
 
@@ -52,7 +53,7 @@ describe("/v1 error handling", function() {
   });
 
   it("should handle lack of permission", function(done) {
-    if (process.env.TRAVIS_PULL_REQUEST) {
+    if (process.env.TRAVIS_PULL_REQUEST && !config.corpus.url) {
       return this.skip();
     }
 
@@ -79,7 +80,7 @@ describe("/v1 error handling", function() {
   });
 
   it("should handle elasticsearch errors", function(done) {
-    if (process.env.TRAVIS_PULL_REQUEST) {
+    if (process.env.TRAVIS_PULL_REQUEST && !config.corpus.url) {
       return this.skip();
     }
     supertest(api)
