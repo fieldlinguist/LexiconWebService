@@ -1,8 +1,9 @@
 module.exports = {
   corpus: {
-    url: "https://public:none@corpusdev.lingsync.org"
+    url: process.env.CORPUS_URL
   },
   search: {
-    url: "https://searchdev.lingsync.org"
+    url: process.env.SEARCH_URL
   }
 };
+console.log("Loaded test config");

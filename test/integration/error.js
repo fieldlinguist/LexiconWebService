@@ -25,6 +25,10 @@ describe("/v1 error handling", function() {
   });
 
   it("should handle corpus not found", function(done) {
+    if (process.env.TRAVIS_PULL_REQUEST) {
+      return this.skip();
+    }
+
     supertest(api)
       .post("/train/lexicon/testing-notacorpus")
       .expect("Content-Type", "application/json; charset=utf-8")
@@ -48,6 +52,10 @@ describe("/v1 error handling", function() {
   });
 
   it("should handle lack of permission", function(done) {
+    if (process.env.TRAVIS_PULL_REQUEST) {
+      return this.skip();
+    }
+
     supertest(api)
       .post("/train/lexicon/jenkins-firstcorpus")
       .expect("Content-Type", "application/json; charset=utf-8")
@@ -71,8 +79,11 @@ describe("/v1 error handling", function() {
   });
 
   it("should handle elasticsearch errors", function(done) {
+    if (process.env.TRAVIS_PULL_REQUEST) {
+      return this.skip();
+    }
     supertest(api)
-      .post("/search/nockedcorpus")
+      .post("/search/notarealcorpus")
       .send({
         value: "something:else"
       })
@@ -90,16 +101,16 @@ describe("/v1 error handling", function() {
                 type: "index_not_found_exception",
                 reason: "no such index",
                 "resource.type": "index_or_alias",
-                "resource.id": "nockedcorpus",
+                "resource.id": "notarealcorpus",
                 index_uuid: "_na_",
-                index: "nockedcorpus"
+                index: "notarealcorpus"
               }],
               type: "index_not_found_exception",
               reason: "no such index",
               "resource.type": "index_or_alias",
-              "resource.id": "nockedcorpus",
+              "resource.id": "notarealcorpus",
               index_uuid: "_na_",
-              index: "nockedcorpus"
+              index: "notarealcorpus"
             },
             status: 404
           },

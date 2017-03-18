@@ -31,7 +31,7 @@ function trainLexicon(req, res, next) {
     method: "GET",
     json: true
   }, function(err, response, body) {
-    debug("requested training data", err, response.statusCode, body);
+    debug("requested training data", err, body);
     if (err) {
       return next(err);
     }

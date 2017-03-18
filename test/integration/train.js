@@ -1,4 +1,5 @@
 "use strict";
+var config = require("config");
 var expect = require("chai").expect;
 var supertest = require("supertest");
 var fixtures = require("../fixtures/lexicon/train.js");
@@ -6,6 +7,13 @@ var api = require("../../");
 
 describe("/v1", function() {
   describe("train", function() {
+    before(function() {
+      if (process.env.TRAVIS_PULL_REQUEST) {
+        return this.skip();
+      }
+      expect(config.corpus.url).to.not.equal(undefined);
+    });
+
     it("should train a lexicon", function(done) {
       this.timeout(10 * 1000);
 

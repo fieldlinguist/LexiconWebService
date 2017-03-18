@@ -1,12 +1,12 @@
 language: node_js
 node_js:
-  - "4"
+- '4'
 
 before_install:
-  - export NODE_ENV=test
-  - npm install jshint -g
-  - npm install bower -g
+- export NODE_ENV=test
+- npm install jshint -g
+- npm install bower -g
 
 script:
-  - npm run lint
-  - npm run test:coverage
+- npm run lint
+- npm run test:coverage

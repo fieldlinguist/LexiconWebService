@@ -85,6 +85,13 @@ describe("/v1", function() {
   });
 
   describe("indexing", function() {
+    before(function() {
+      if (process.env.TRAVIS_PULL_REQUEST) {
+        return this.skip();
+      }
+      expect(config.search.url).to.not.equal(undefined);
+    });
+
     it("should have a template", function(done) {
       supertest(config.search.url)
         .get("/_template")
@@ -136,7 +143,7 @@ describe("/v1", function() {
           }
 
           if (res.status >= 500) {
-            expect(res.body.message).to.not.equal("connect ECONNREFUSED 127.0.0.1:9200");
+            expect(res.body.message).to.equal("Bad Gateway");
             expect(res.body).to.deep.equal({});
             return done();
           }
@@ -205,7 +212,7 @@ describe("/v1", function() {
           }
 
           if (res.status >= 500) {
-            expect(res.body.message).to.not.equal("connect ECONNREFUSED 127.0.0.1:9200");
+            expect(res.body.message).to.equal("Bad Gateway");
             expect(res.body).to.deep.equal({});
             return done();
           }
@@ -239,7 +246,7 @@ describe("/v1", function() {
               .get("/testinglexicon-kartuli")
               .reply(200, fixtures.search.properties.kartuli);
           }
-          
+
           // look at the index properties
           supertest(config.search.url)
             .get("/testinglexicon-kartuli")
@@ -271,6 +278,13 @@ describe("/v1", function() {
   });
 
   describe("search", function() {
+    before(function() {
+      if (process.env.TRAVIS_PULL_REQUEST) {
+        return this.skip();
+      }
+      expect(config.search.url).to.not.equal(undefined);
+    });
+    
     it("should search a database", function(done) {
       this.timeout(10 * 1000);
       var searchNock;
@@ -296,66 +310,27 @@ describe("/v1", function() {
           }
 
           if (res.status === 401) {
-            expect(res.status).to.equal(401);
             expect(res.body).to.deep.equal({
-              message: "action [indices:data/read/search] requires authentication",
-              error: {},
+              error: {
+                error: "Unauthorized",
+                status: 401,
+                message: "Unauthorized",
+              },
+              message: "Unauthorized",
               status: 401
             });
-            return done();
           }
 
-          if (res.status === 500) {
-            expect(res.status).to.equal(500);
-
-            if (res.body.message.indexOf("ECONNREFUSED") > -1) {
-              expect(res.body).to.deep.equal({
-                message: "connect ECONNREFUSED 127.0.0.1:9200",
-                error: {
-                  address: "127.0.0.1",
-                  code: "ECONNREFUSED",
-                  errno: "ECONNREFUSED",
-                  port: 9200,
-                  syscall: "connect"
-                },
-                status: 500
-              });
-              return done();
-            }
-
-            expect(res.body).to.deep.equal({
-              message: "Unknown cluster.",
-              error: {},
-              status: 500
-            });
-            return done();
+          if (res.status >= 500) {
+            expect(res.body.message).to.equal("Bad Gateway");
+            expect(res.body).to.deep.equal({});
           }
 
           if (res.status >= 400) {
-            expect(res.body).to.deep.equal({
-              message: "no such index",
-              error: {
-                error: {
-                  root_cause: [{
-                    type: "index_not_found_exception",
-                    reason: "no such index",
-                    "resource.type": "index_or_alias",
-                    "resource.id": "testinglexicon-kartuli",
-                    index_uuid: "_na_",
-                    index: "testinglexicon-kartuli"
-                  }],
-                  type: "index_not_found_exception",
-                  reason: "no such index",
-                  "resource.type": "index_or_alias",
-                  "resource.id": "testinglexicon-kartuli",
-                  index_uuid: "_na_",
-                  index: "testinglexicon-kartuli"
-                },
-                status: 404
-              },
-              status: 404
-            });
-            return done();
+            expect(res.body.message).to.not.equal("Failed to derive xcontent");
+            expect(res.body.message).to.not.equal("Unknown cluster.");
+            expect(res.body.message).to.not.equal("no such index");
+            expect(res.body).to.deep.equal({});
           }
 
           debug(JSON.stringify(res.body, null, 2));
