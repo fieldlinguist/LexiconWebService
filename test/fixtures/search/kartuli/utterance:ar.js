@@ -1,5 +1,5 @@
 module.exports = {
-  "took": 2,
+  "took": 3,
   "timed_out": false,
   "_shards": {
     "total": 5,
@@ -31,6 +31,14 @@ module.exports = {
         }, {
           "filename": "deda_me_ar_minda_kortsvili.mp3"
         }]
+      },
+      "highlight": {
+        "orthography": [
+          "<em>არ</em> მინდა"
+        ],
+        "translation": [
+          "I <em>don't</em> want this/that."
+        ]
       }
     }, {
       "_index": "testinglexicon-kartuli",
@@ -49,6 +57,11 @@ module.exports = {
         "dateElicited": "Mar 7, 2013",
         "user": "gina",
         "dateSEntered": "2014-03-15T04:49:26.624Z"
+      },
+      "highlight": {
+        "translation": [
+          "I <em>don't</em> want any, thanks."
+        ]
       }
     }]
   },
@@ -66,6 +79,12 @@ module.exports = {
             "translation": "don't"
           }
         }]
+      }
+    },
+    "highlight": {
+      "fields": {
+        "orthography": {},
+        "translation": {}
       }
     },
     // "fielddata_fields": "doc_values",
