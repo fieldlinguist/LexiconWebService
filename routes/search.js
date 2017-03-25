@@ -20,23 +20,14 @@ function querySearch(req, res, next) {
 
   debug("body", req.body);
   var dbname = req.params.dbname;
-  var queryString = req.body.value;
+  var queryString = req.body.query;
   if (queryString && typeof queryString.trim === "function") {
     queryString = queryString.trim();
     console.log("Trimming string " + queryString);
   }
-  if (!queryString) {
-    res.status(400);
-    res.json([]);
-    return;
-  }
+  
   var queryTokens = search.processQueryString(queryString);
-  if (!queryTokens || queryTokens.length === 0) {
-    res.status(400);
-    res.json([]);
-    return;
-  }
-  var elasticsearchTemplateString = search.addQueryTokens(queryTokens);
+  var elasticsearchTemplateString = search.addQueryTokens(queryTokens || []);
   debug(elasticsearchTemplateString);
 
   var searchOptions = url.parse(config.search.url);
