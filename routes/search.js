@@ -45,12 +45,12 @@ function querySearch(req, res, next) {
   debug("searchOptions ", searchOptions, elasticsearchTemplateString);
   debug("elasticsearchTemplateString ", elasticsearchTemplateString);
   request({
-    data: elasticsearchTemplateString,
+    body: elasticsearchTemplateString,
     json: true,
-    method: "POST",
+    method: "GET",
     uri: url.format(searchOptions)
   }, function(err, response, body) {
-    debug("requested search result", err, body);
+    debug("requested search result", url.format(searchOptions), err, body);
     if (err) {
       return next(err);
     }
@@ -187,6 +187,7 @@ function indexDatabase(req, res, next) {
 
 router.post("/:dbname/index", indexDatabase);
 router.post("/:dbname", querySearch);
+router.get("/:dbname", querySearch);
 
 module.exports.querySearch = querySearch;
 module.exports.indexDatabase = indexDatabase;

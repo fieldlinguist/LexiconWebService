@@ -334,7 +334,7 @@ describe("/v1", function() {
           }
 
           debug(JSON.stringify(res.body, null, 2));
-          expect(res.body.hits.total).to.equal(4);
+          expect(res.body.hits.total).to.equal(2);
           delete res.body.took;
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
