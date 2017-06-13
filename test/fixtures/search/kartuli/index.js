@@ -5,7 +5,7 @@ module.exports = {
     "index": {
       "_index": "testinglexicon-kartuli",
       "_type": "datum",
-      "_id": "3328d6a49281e117e859adddcd006168",
+      "_id": "d3bf748b16ac4054680f27a6401efdfa",
       "_version": 17,
       "_shards": {
         "total": 2,
@@ -18,7 +18,7 @@ module.exports = {
     "index": {
       "_index": "testinglexicon-kartuli",
       "_type": "datum",
-      "_id": "3328d6a49281e117e859adddcd026851",
+      "_id": "d3bf748b16ac4054680f27a6401fab52",
       "_version": 10,
       "_shards": {
         "total": 2,
@@ -31,7 +31,7 @@ module.exports = {
     "index": {
       "_index": "testinglexicon-kartuli",
       "_type": "datum",
-      "_id": "d3bf748b16ac4054680f27a6401be629",
+      "_id": "d3bf748b16ac4054680f27a6401f1bc6",
       "_version": 10,
       "_shards": {
         "total": 2,
@@ -44,7 +44,7 @@ module.exports = {
     "index": {
       "_index": "testinglexicon-kartuli",
       "_type": "datum",
-      "_id": "d3bf748b16ac4054680f27a6401c757e",
+      "_id": "eff8773970b2ebbf958af417890112ab",
       "_version": 10,
       "_shards": {
         "total": 2,

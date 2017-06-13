@@ -10,6 +10,7 @@ var fixtures = {
   search: {
     index: {
       kartuli: require("../fixtures/search/kartuli/index"),
+      inuktitut: require("../fixtures/search/inuktitut/index"),
       quechua: require("../fixtures/search/quechua/index")
     },
     createIndex: {
@@ -24,6 +25,7 @@ var fixtures = {
   },
   database: {
     kartuli: require("../fixtures/database/kartuli/searchable"),
+    inuktitut: require("../fixtures/database/inuktitut/searchable"),
     quechua: require("../fixtures/database/quechua/searchable")
   }
 };
@@ -275,6 +277,161 @@ describe("/v1", function() {
             });
         });
     });
+
+    it("should support limit and offset", function(done) {
+      this.timeout(10 * 1000);
+      var corpusNock;
+      var searchNock;
+      if (useNocks) {
+        corpusNock = nock(config.corpus.url)
+          .get("/testinglexicon-kartuli/_design/search/_view/searchable")
+          .query({
+            limit: 4,
+            skip: 68
+          })
+          .reply(200, fixtures.database.kartuli);
+
+        searchNock = nock(config.search.url)
+          // .filteringRequestBody(/.*/, "*")
+          .post("/testinglexicon-kartuli/datum/_bulk", function(body) {
+            debug("posted body was", body);
+            return true;
+          })
+          .reply(200, fixtures.search.index.kartuli);
+      }
+
+      supertest(api)
+        .post("/search/testinglexicon-kartuli/index")
+        .query({
+          limit: 4,
+          offset: 68
+        })
+        .expect("Content-Type", "application/json; charset=utf-8")
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          if (useNocks) {
+            corpusNock.done();
+            searchNock.done();
+          }
+
+          if (res.status >= 500) {
+            expect(res.body.message).to.equal("Bad Gateway");
+            expect(res.body).to.deep.equal({});
+            return done();
+          }
+
+          if (res.status >= 400) {
+            expect(res.body.message).to.not.equal("Failed to derive xcontent");
+            expect(res.body).to.deep.equal({});
+            return done();
+          }
+
+          debug("res.body.couchDBResult", JSON.stringify(res.body.couchDBResult, null, 2));
+          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.kartuli);
+
+          var elasticSearchResult = res.body.elasticSearchResult;
+          // could take 5 or 6 ms
+          delete elasticSearchResult.took;
+
+          elasticSearchResult.items.map(function(item) {
+            delete item.index.result;
+            delete item.index.created;
+            delete item.index._version; // version will increase on each request
+            delete item.index.status; // status might be 201 created or 200 updated
+            delete item.index._shards.successful; // successful will match the number of shards
+          });
+
+          debug(JSON.stringify(elasticSearchResult, null, 2));
+          expect(elasticSearchResult).to.deep.equal(fixtures.search.index.kartuli);
+
+          if (useNocks) {
+            searchNock = nock(config.search.url)
+              .get("/testinglexicon-kartuli")
+              .reply(200, fixtures.search.properties.kartuli);
+          }
+
+          // look at the index properties
+          supertest(config.search.url)
+            .get("/testinglexicon-kartuli")
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+              if (useNocks) {
+                searchNock.done();
+              }
+
+              debug(JSON.stringify(res.body));
+              delete res.body["testinglexicon-kartuli"].settings.index.creation_date;
+              delete res.body["testinglexicon-kartuli"].settings.index.uuid;
+              if (res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas) {
+                res.body["testinglexicon-kartuli"].settings.index.number_of_replicas = res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas;
+                delete res.body["testinglexicon-kartuli"].settings.index.numberOfReplicas;
+              }
+              if (res.body["testinglexicon-kartuli"].settings.index.numberOfShards) {
+                res.body["testinglexicon-kartuli"].settings.index.number_of_shards = res.body["testinglexicon-kartuli"].settings.index.numberOfShards;
+                delete res.body["testinglexicon-kartuli"].settings.index.numberOfShards;
+              }
+              expect(res.body).to.deep.equal(fixtures.search.properties.kartuli);
+
+              done();
+            });
+        });
+    });
+
+    it("should (re-)index a large database", function(done) {
+      if (process.env.TRAVIS_PULL_REQUEST) {
+        return this.skip();
+      }
+
+      this.timeout(60 * 1000);
+
+      supertest(api)
+        .post("/search/gina-inuktitut/index")
+        .query({
+          limit: 4
+        })
+        .expect("Content-Type", "application/json; charset=utf-8")
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          debug("res.body.couchDBResult", JSON.stringify(res.body.couchDBResult));
+          expect(res.body.couchDBResult).to.deep.equal(fixtures.database.inuktitut);
+          expect(res.body.elasticSearchResult).to.not.equal(null);
+          var elasticSearchResult = res.body.elasticSearchResult;
+          // could take 5 or 6 ms
+          delete elasticSearchResult.took;
+
+          elasticSearchResult.items.map(function(item) {
+            delete item.index.result;
+            delete item.index.created;
+            delete item.index._version; // version will increase on each request
+            delete item.index.status; // status might be 201 created or 200 updated
+            delete item.index._shards.successful; // successful will match the number of shards
+          });
+
+          debug(JSON.stringify(elasticSearchResult, null, 2));
+          expect(elasticSearchResult).to.deep.equal(fixtures.search.index.inuktitut);
+
+          supertest(api)
+            .post("/search/gina-inuktitut")
+            .send({})
+            .expect("Content-Type", "application/json; charset=utf-8")
+            .end(function(err, res) {
+              if (err) {
+                return done(err);
+              }
+
+              expect(res.body.hits.total).to.equal(1541);
+
+              done();
+            });
+        });
+    });
   });
 
   describe("search", function() {
@@ -284,7 +441,7 @@ describe("/v1", function() {
       }
       expect(config.search.url).to.not.equal(undefined);
     });
-    
+
     it("should search a database", function(done) {
       this.timeout(10 * 1000);
       var searchNock;
@@ -334,7 +491,7 @@ describe("/v1", function() {
           }
 
           debug(JSON.stringify(res.body, null, 2));
-          expect(res.body.hits.total).to.equal(2);
+          expect(res.body.hits.total).to.equal(6);
           delete res.body.took;
           expect(res.body).to.deep.equal(fixtures.search.query.kartuli);
 
@@ -343,3 +500,4 @@ describe("/v1", function() {
     });
   });
 });
+
