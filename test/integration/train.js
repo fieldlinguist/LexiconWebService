@@ -31,7 +31,7 @@ describe("/v1", function() {
           // Travis doesnt have a local lexicon
           if (!res.body.rows) {
             expect(res.status).to.equal(500);
-            console.log(res.body);
+            // console.log(res.body);
             expect(res.body).to.deep.equal({
               message: "connect ECONNREFUSED 127.0.0.1:5984",
               error: {},

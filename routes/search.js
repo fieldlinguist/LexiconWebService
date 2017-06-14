@@ -1,3 +1,4 @@
+/* globals Promise */
 "use strict";
 
 var config = require("config");
@@ -23,9 +24,9 @@ function querySearch(req, res, next) {
   var queryString = req.body.query;
   if (queryString && typeof queryString.trim === "function") {
     queryString = queryString.trim();
-    console.log("Trimming string " + queryString);
+    debug("Trimming string " + queryString);
   }
-  
+
   var queryTokens = search.processQueryString(queryString);
   var elasticsearchTemplateString = search.addQueryTokens(queryTokens || []);
   debug(elasticsearchTemplateString);
@@ -97,83 +98,103 @@ function declareAnalyzer(req, res, next) {
  * @param  {Response} res
  * @param  {Function} next
  */
-function indexDatabase(req, res, next) {
-  debug("indexDatabase", req.params);
+function indexDatabaseChunk(req, res, next) {
+  return new Promise(function(resolve) {
+    debug("indexDatabaseChunk", req.params);
+    var dbname = req.params.dbname;
 
-  var dbname = req.params.dbname;
-  var limit = req.query.limit || config.search.DEFAULT_MAX_INDEX_LIMIT;
-  limit = Math.min(limit, config.search.DEFAULT_MAX_INDEX_LIMIT);
+    debug("Config", config, process.env);
+    var couchDBOptions = url.parse(config.corpus.url + "/" + dbname + "/_design/search/_view/searchable");
+    couchDBOptions.query = {
+      skip: req.query.skip,
+      limit: req.query.limit
+    };
 
-  debug("Config", config, process.env);
-  var couchDBOptions = url.parse(config.corpus.url + "/" + dbname + "/_design/search/_view/searchable");
-  couchDBOptions.query = {
-    limit: limit
-  };
-
-  debug("GET ", couchDBOptions);
-  request({
-    json: true,
-    method: "GET",
-    uri: url.format(couchDBOptions)
-  }, function(err, response, couchDBResult) {
-    debug("requested training data", couchDBResult);
-    if (err) {
-      return next(err);
-    }
-    if (response.statusCode >= 400) {
-      if (couchDBResult.reason === "missing") {
-        couchDBResult.reason = "Missing search map reduce";
-      }
-      couchDBResult.status = response.statusCode;
-      return next(couchDBResult);
-    }
-
-    // create bulk requests
-    var data = [];
-    couchDBResult.rows.map(function(row) {
-      var searchable = row.key;
-      data.push({
-        "index": {
-          "_id": row.id,
-          "_type": "datum",
-          "_index": dbname
-        }
-      });
-
-      data.push(searchable);
-    });
-    // convert into 1 request per line (non-json)
-    data = data.map(JSON.stringify).join("\n") + "\n";
-    debug("(re-)indexing with \n\n", data);
-    debug("\n\n");
-
+    debug("GET ", couchDBOptions);
     request({
-      body: data,
-      // json: true,
-      method: "POST",
-      uri: url.format(config.search.url + "/" + dbname + "/datum/_bulk")
-    }, function(err, response, elasticSearchResult) {
-      debug("index search elasticSearchResult", err, elasticSearchResult);
+      json: true,
+      method: "GET",
+      uri: url.format(couchDBOptions)
+    }, function(err, response, couchDBResult) {
+      debug("requested training data", couchDBResult);
       if (err) {
         return next(err);
       }
-      try {
-        elasticSearchResult = JSON.parse(elasticSearchResult);
-      } catch (parseError) {
-        return next(parseError);
-      }
       if (response.statusCode >= 400) {
-        elasticSearchResult.status = response.statusCode;
-        return next(elasticSearchResult);
+        if (couchDBResult.reason === "missing") {
+          couchDBResult.reason = "Missing search map reduce";
+        }
+        couchDBResult.status = response.statusCode;
+        return next(couchDBResult);
       }
+      // create bulk requests
+      var data = [];
+      couchDBResult.rows.map(function(row) {
+        var searchable = row.key;
+        data.push({
+          "index": {
+            "_id": row.id,
+            "_type": "datum",
+            "_index": dbname
+          }
+        });
 
-      res.status(response.statusCode);
-      res.json({
-        couchDBResult: couchDBResult,
-        elasticSearchResult: elasticSearchResult
+        data.push(searchable);
+      });
+      // convert into 1 request per line (non-json)
+      data = data.map(JSON.stringify).join("\n") + "\n";
+      debug("(re-)indexing with \n\n", data);
+      debug("\n\n");
+
+      request({
+        body: data,
+        // json: true,
+        method: "POST",
+        uri: url.format(config.search.url + "/" + dbname + "/datum/_bulk")
+      }, function(err, response, elasticSearchResult) {
+        debug("index search elasticSearchResult", err, elasticSearchResult);
+        if (err) {
+          return next(err);
+        }
+        try {
+          elasticSearchResult = JSON.parse(elasticSearchResult);
+        } catch (parseError) {
+          return next(parseError);
+        }
+        if (response.statusCode >= 400) {
+          elasticSearchResult.status = response.statusCode;
+          return next(elasticSearchResult);
+        }
+
+        var newOffset = req.query.skip + req.query.limit;
+        debug("newOffset", newOffset);
+        if (!couchDBResult.total_rows || couchDBResult.total_rows <= newOffset) {
+          return resolve({
+            statusCode: response.statusCode,
+            couchDBResult: couchDBResult,
+            elasticSearchResult: elasticSearchResult
+          });
+        }
+        req.query.skip = newOffset;
+        return indexDatabaseChunk(req, res, next).then(resolve);
       });
     });
   });
+}
+
+function indexDatabase(req, res, next) {
+  req.query.skip = req.query.offset || 0;
+  var limit = req.query.limit || config.search.DEFAULT_MAX_INDEX_LIMIT;
+  req.query.limit = Math.min(limit, config.search.DEFAULT_MAX_INDEX_LIMIT);
+
+  return indexDatabaseChunk(req, res, next)
+    .then(function(result) {
+      res.status(result.statusCode);
+      res.json({
+        couchDBResult: result.couchDBResult,
+        elasticSearchResult: result.elasticSearchResult
+      });
+    }).catch(next);
 }
 
 router.post("/:dbname/index", indexDatabase);
