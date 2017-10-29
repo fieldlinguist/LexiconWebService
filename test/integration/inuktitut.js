@@ -1,4 +1,5 @@
 "use strict";
+var config = require("config");
 var expect = require("chai").expect;
 var supertest = require("supertest");
 
@@ -18,7 +19,7 @@ var api = require("../../");
  */
 describe("/v1", function() {
   describe("GET inuktitut", function() {
-    this.timeout(10 * 1000);
+    this.timeout(config.test.timeout.medium);
 
     describe("farley's Uqailaut", function() {
       it("should analyze nuna", function(done) {
