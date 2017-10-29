@@ -108,7 +108,7 @@ describe("/v1", function() {
     });
 
     it("should (re-)index a metadata heavy database", function(done) {
-      this.timeout(10 * 1000);
+      this.timeout(config.test.timeout.medium);
 
       var corpusNock;
       var searchNock;
@@ -178,7 +178,7 @@ describe("/v1", function() {
     });
 
     it("should (re-)index a media heavy database", function(done) {
-      this.timeout(10 * 1000);
+      this.timeout(config.test.timeout.medium);
       var corpusNock;
       var searchNock;
       if (useNocks) {
@@ -279,7 +279,7 @@ describe("/v1", function() {
     });
 
     it("should support limit and offset", function(done) {
-      this.timeout(10 * 1000);
+      this.timeout(config.test.timeout.medium);
       var corpusNock;
       var searchNock;
       if (useNocks) {
@@ -386,7 +386,7 @@ describe("/v1", function() {
         return this.skip();
       }
 
-      this.timeout(60 * 1000);
+      this.timeout(config.test.timeout.long);
 
       supertest(api)
         .post("/search/gina-inuktitut/index")
@@ -443,7 +443,7 @@ describe("/v1", function() {
     });
 
     it("should search a database", function(done) {
-      this.timeout(10 * 1000);
+      this.timeout(config.test.timeout.medium);
       var searchNock;
       if (useNocks) {
         searchNock = nock(config.search.url)

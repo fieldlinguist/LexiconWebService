@@ -12,8 +12,15 @@ var config = {
   url: "https://localhost:3185",
   ssl: {
     key: fs.readFileSync(__dirname + "/fielddb_debug.key", "utf8"),
-    cert: fs.readFileSync(__dirname + "/fielddb_debug.crt", "utf8")
-  }
+    cert: fs.readFileSync(__dirname + "/fielddb_debug.crt", "utf8"),
+  },
+  test: {
+    timeout: {
+      short: 2 * 1000,
+      medium: 10 * 1000,
+      long: 60 * 1000,
+    },
+  },
 };
 
 console.log("Loaded default config");
