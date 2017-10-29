@@ -15,7 +15,7 @@ describe("/v1", function() {
     });
 
     it("should train a lexicon", function(done) {
-      this.timeout(10 * 1000);
+      this.timeout(config.test.timeout.medium);
 
       supertest(api)
         .post("/train/lexicon/testinglexicon-kartuli")
