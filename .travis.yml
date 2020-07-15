@@ -5,6 +5,7 @@ node_js:
 
 before_install:
 - java --version
+- ./lib/uqailaut.sh taaqtualuulluni || exit 1
 - export NODE_ENV=test
 - npm install jshint -g
 - npm install bower -g
