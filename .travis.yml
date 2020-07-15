@@ -4,6 +4,7 @@ node_js:
 - 12
 
 before_install:
+- java --version
 - export NODE_ENV=test
 - npm install jshint -g
 - npm install bower -g
